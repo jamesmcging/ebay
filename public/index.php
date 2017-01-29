@@ -16,4 +16,5 @@ require '../src/config/Credentials.php';
 $app = new \Slim\App;
 require '../src/routes/homepage.php';
 require '../src/routes/items.php';
+require '../src/routes/authorizations.php';
 $app->run();
