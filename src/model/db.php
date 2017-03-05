@@ -15,9 +15,25 @@ class db {
 	public static function getInstance() {
 		if (!self::$instance)
 		{
-      self::$instance = new PDO('mysql:host='.Credentials::DB_HOST.';dbname='.Credentials::DB_NAME, Credentials::DB_USER, Credentials::DB_PASS);
-			self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			self::$instance->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+      // If we are on AWS then these server variables should exist
+      if (!empty($_SERVER['RDS_HOSTNAME'])) {
+        $dbhost = $_SERVER['RDS_HOSTNAME'];
+        $dbport = $_SERVER['RDS_PORT'];
+        $dbname = $_SERVER['RDS_DB_NAME'];
+        $charset = 'utf8' ;
+
+        $dsn = "mysql:host={$dbhost};port={$dbport};dbname={$dbname};charset={$charset}";
+        $username = $_SERVER['RDS_USERNAME'];
+        $password = $_SERVER['RDS_PASSWORD'];
+
+        self::$instance = new PDO($dsn, $username, $password);
+
+      // Otherwise we are in development locally
+      } else {
+        self::$instance = new PDO('mysql:host='.Credentials::DB_HOST.';dbname='.Credentials::DB_NAME, Credentials::DB_USER, Credentials::DB_PASS);
+        self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        self::$instance->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+      }
 		}
     
 		return self::$instance;
