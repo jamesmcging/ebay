@@ -1,0 +1,158 @@
+/*#pagecontent {
+  width: 970px;
+}*/
+
+/******************************************************************************/
+/** Dashboard Tab *************************************************************/
+/******************************************************************************/
+.status-panel {
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 0px 6px 6px 6px;
+}
+.status-panel:hover {
+  box-shadow:0 0 20px rgba(0,0,0,0.25);
+  padding-top:5px;
+}
+.status-panel-active {
+  background-color: #dff0d8;
+  color: #468847;
+}
+.status-panel-inactive {
+  background-color: #f2dede;
+  color: #b94a48;
+}
+.status-panel-active:before {
+  content:'\f00c';font-family:'FontAwesome';float:left;width:25px;height:45px;font-size:35px;clear:both;line-height:35px;
+}
+.status-panel-inactive:before {
+  content:'\f12a';font-family:'FontAwesome';float:left;width:25px;height:45px;font-size:35px;clear:both;line-height:35px;
+}
+
+.status-panel-link {}
+
+.bordered-panel{
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
+}
+
+/******************************************************************************/
+/** Store Catalogue Tab *******************************************************/
+/******************************************************************************/
+/* store-catalogue-search-panel */
+#store-catalogue-search-panel {  
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+/* Store Catalogue Filter Box */
+#store-catalogue-filter-box {
+  background-color: #e7e7e7;
+  border: 1px solid #ccc;
+  
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+/* Store Catalogue Listing Head of Table */
+#head-store-catalogue {
+  background-color: #e7e7e7;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  
+  padding: 5px;
+}
+
+.sort-field-descending:hover:after {
+  font-family:fontAwesome;
+  content:'\00a0\f0d7';
+  color:black;
+}
+
+.sort-field-ascending:hover:after {
+  font-family:fontAwesome;
+  content:'\00a0\f0d8';
+  color:black;
+}
+
+div .catalogue-item {
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  
+  padding: 5px;
+  height: 75px;
+}
+
+div .catalogue-item:hover {
+  background-color: rgb(253, 254, 253);
+}
+
+.selected-item {
+  background-color: rgb(253, 254, 253);
+}
+
+
+#head-store-catalogue div {
+  font-weight: bold;
+}
+
+.catalogue-item img {
+  max-height: 65px;
+}
+
+.ghost {
+  color: #aaa;
+}
+
+.dropdown-menu {
+  text-align: left;
+}
+
+#pagination-panel {
+  background-color: #e7e7e7;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  
+  padding: 5px;
+}
+
+.pagination {
+  margin: 0px;
+}
+
+/* The item details slide out panel */
+#item-details-panel {
+  border: 1px solid #ccc;
+  height: 100%
+}
+
+#item-details-head {
+  background-color: #e7e7e7;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  
+  
+  margin-bottom: 5px;
+  
+  min-height:40px;
+  
+  padding: 5px;
+}
+
+#item-details-head span {
+  font-weight: bold;
+}
+
+div .controls {
+  padding-bottom: 2px;
+}
+
+.controls input {
+  height: 26px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}

@@ -1,10 +1,10 @@
 <?php
+namespace ebay\model;
+use ebay\config\Credentials as Credentials;
+use PDO;
+
 class db {
-  const DB_HOST = 'localhost';
-  const DB_NAME = 'store_599';
-  const DB_USER = 'jamesmcg';
-  const DB_PASS = 'password';
-  
+
 	private static $instance = NULL;
 
 	/**
@@ -15,7 +15,7 @@ class db {
 	public static function getInstance() {
 		if (!self::$instance)
 		{
-			self::$instance = new PDO('mysql:host='.self::DB_HOST.';dbname='.self::DB_NAME, self::DB_USER, self::DB_PASS);
+      self::$instance = new PDO('mysql:host='.Credentials::DB_HOST.';dbname='.Credentials::DB_NAME, Credentials::DB_USER, Credentials::DB_PASS);
 			self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			self::$instance->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 		}

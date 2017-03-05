@@ -1,13 +1,15 @@
 <?php
+namespace ebay\routes;
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
+use \ebay\src\resources as Items;
 
 
-
-
-
-$app->get('/items', function (Request $request, Response $response) {
+$app->get('/items', function (Request $objRequest, Response $objResponse) {
+  
+  $objItems = new Items($objRequest, $objResponse);
+  $objItems->get();
   
   
   $arrFields = array();
