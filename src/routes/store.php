@@ -20,7 +20,7 @@ $app->get('/store', function (Request $objRequest, Response $objResponse) {
       $arrCount = $sStatement->fetch(\PDO::FETCH_ASSOC);
       $nSkuCount = $arrCount['skucount'];
     } else {
-      throw new Exception($sQuery.' failed in execution');
+      throw new \Exception($sQuery.' failed in execution');
     }
     
   } catch (Exception $objException) {
