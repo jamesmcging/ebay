@@ -11,15 +11,17 @@ $app->get('/store', function (Request $objRequest, Response $objResponse) {
   
   $objDB = db::getInstance();
   
-  $sQuery = "SELECT count(*) as skucount FROM product";
-
   try {
+    $sQuery = "SELECT count(*) as skucount FROM product";
+    $objStatement = $objDB->prepare($sQuery);
     
-    $sStatement = $objDB->query($sQuery);
-    
-    $arrCount = $sStatement->fetch(\PDO::FETCH_ASSOC);
-
-    $nSkuCount = $arrCount['skucount'];
+    if ($objStatement->execute()) {
+      $sStatement = $objDB->query($sQuery);
+      $arrCount = $sStatement->fetch(\PDO::FETCH_ASSOC);
+      $nSkuCount = $arrCount['skucount'];
+    } else {
+      throw new Exception($sQuery.' failed in execution');
+    }
     
   } catch (Exception $objException) {
     $objResponse->getBody()->write(json_encode($objException));
