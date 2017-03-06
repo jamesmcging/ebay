@@ -1,6 +1,42 @@
 <?php
 error_reporting(E_ALL); ini_set('display_errors', 1);
 
+
+
+echo "<pre>";
+print_r($_SERVER);
+echo "</pre>";
+die();
+
+$dbhost = $_SERVER['RDS_HOSTNAME'];
+$dbport = $_SERVER['RDS_PORT'];
+$dbname = $_SERVER['RDS_DB_NAME'];
+$charset = 'utf8' ;
+
+$dsn = "mysql:host={$dbhost};port={$dbport};dbname={$dbname};charset={$charset}";
+$username = $_SERVER['RDS_USERNAME'];
+$password = $_SERVER['RDS_PASSWORD'];
+
+$objPDO = new \PDO($dsn, $username, $password);
+
+$objPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$objPDO->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+$stmt = $objPDO->query('SELECT count(*) FROM product');
+while ($row = $stmt->fetch())
+{
+    echo $row['name'] . "\n";
+}
+die('product count: '.$nSkuCount);
+
+
+
+
+
+
+
+
+
+
 require '../vendor/autoload.php';
 
 use ebay\classes;
