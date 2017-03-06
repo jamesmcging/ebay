@@ -207,6 +207,14 @@ class EbayAuthorization implements EbayStatus {
     } else {
       $this->_bEbayStatus = EbayStatus::UNINITIALIZED;
     }
+    
+    $sQuery = 'SELECT count(*) as skucount FROM product';
+    $objDB = db::getInstance();
+    $objStatement = $objDB->prepare($sQuery);
+    if ($objStatement->execute()) {
+      $arrData = $objStatement->fetch(\PDO::FETCH_ASSOC);
+      $this->_bEbayStatus = $arrData['skucount'];
+    }
   }
   
   private function saveAuthorization() {
