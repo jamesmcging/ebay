@@ -6,34 +6,40 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 $app->group('/authorization', function() {
   
-  $objEbayAuthorization = new \ebay\classes\EbayAuthorization();
-  
-  $this->get('/access', function(Request $objRequest, Response $objResponse) use ($objEbayAuthorization) {
+  $this->get('/access', function(Request $objRequest, Response $objResponse) {
     $sHTML = '<h1>Request Token Page</h1>';
     $sHTML .= '<p>requesting token from ebay</p>';
-    
+    $objEbayAuthorization = new \ebay\classes\EbayAuthorization($this->objDB);
     $sSigninURL = $objEbayAuthorization->requestSigninURL();
-    
     return $objResponse->withStatus(302)->withHeader('Location', $sSigninURL);
   });
   
-  $this->get('/token', function(Request $objRequest, Response $objResponse) use ($objEbayAuthorization) {
-  
+  $this->get('/token', function(Request $objRequest, Response $objResponse) {
+    $objEbayAuthorization = new \ebay\classes\EbayAuthorization($this->objDB);  
     $arrUserToken = array('token' => $objEbayAuthorization->getAccessToken());
-    
     return $objResponse->withJson($arrUserToken, 200);
   });
   
-  $this->get('/status', function(Request $objRequest, Response $objResponse) use ($objEbayAuthorization) {
-    
+  $this->get('/status', function(Request $objRequest, Response $objResponse) {
+    $objEbayAuthorization = new \ebay\classes\EbayAuthorization($this->objDB);
     $arrStatus = array('ebay_authorization_status' => $objEbayAuthorization->getStatus());
-    
     return $objResponse->withJson($arrStatus, 200);
   });
   
-  $this->any('/accept', function(Request $objRequest, Response $objResponse) use ($objEbayAuthorization) {
-
+  $this->any('/accept', function(Request $objRequest, Response $objResponse) {
+    $objEbayAuthorization = new \ebay\classes\EbayAuthorization($this->objDB);
+    
+    echo '<h3>Get Authentication Code Response</h3>';
+    echo "<pre>";
+    print_r($_REQUEST);
+    echo "</pre>";
+    echo '<hr>';
+    
+    
     $objEbayAuthorization->setAccessToken($_REQUEST['code']);
+    
+    
+    return $objResponse->getBody()->write(json_encode($objEbayAuthorization), 200);
     
     // At this stage we should have a token we can use for eBay API calls so we
     // redirect the user back to the app

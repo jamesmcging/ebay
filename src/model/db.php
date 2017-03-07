@@ -19,7 +19,7 @@ class db {
       if (!empty($_SERVER['RDS_HOSTNAME'])) {
         $dbhost = $_SERVER['RDS_HOSTNAME'];
         $dbport = $_SERVER['RDS_PORT'];
-        $dbname = $_SERVER['RDS_DB_NAME'];
+        $dbname = 'store_599';//$_SERVER['RDS_DB_NAME'];
         $charset = 'utf8' ;
 
         $dsn = "mysql:host={$dbhost};port={$dbport};dbname={$dbname};charset={$charset}";

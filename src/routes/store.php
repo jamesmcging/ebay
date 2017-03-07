@@ -9,14 +9,12 @@ $app->get('/store', function (Request $objRequest, Response $objResponse) {
   
   $nSkuCount = 'unknown';
   
-  $objDB = db::getInstance();
-  
   try {
     $sQuery = "SELECT count(*) as skucount FROM product";
-    $objStatement = $objDB->prepare($sQuery);
+    $objStatement = $this->objDB->prepare($sQuery);
     
     if ($objStatement->execute()) {
-      $sStatement = $objDB->query($sQuery);
+      $sStatement = $this->objDB->query($sQuery);
       $arrCount = $sStatement->fetch(\PDO::FETCH_ASSOC);
       $nSkuCount = $arrCount['skucount'];
     } else {
