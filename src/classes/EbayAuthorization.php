@@ -54,7 +54,7 @@ class EbayAuthorization implements EbayStatus {
    * @throws Exception
    */
   public function requestSigninURL() {
-    //$sSigninURL = false;
+    $sSigninURL = false;
         
     $arrQueryElements = array(
       'client_id'     => $this->_sClientId,
@@ -63,41 +63,7 @@ class EbayAuthorization implements EbayStatus {
       'scope'         => 'https://api.ebay.com/oauth/api_scope/sell.inventory', //https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/buy.order.readonly https://api.ebay.com/oauth/api_scope/buy.guest.order https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly',
       'state'         => '12345'
     );
-    $sRequestURL = $this->_sGetAuthorizationEndpoint.'?'.http_build_query($arrQueryElements);
-    
-    try {
-      $rscRequest = curl_init();
-      curl_setopt($rscRequest, CURLOPT_URL, $sRequestURL);
-      curl_setopt($rscRequest, CURLOPT_CONNECTTIMEOUT, 10);
-      curl_setopt($rscRequest, CURLOPT_TIMEOUT, 10);
-      curl_setopt($rscRequest, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($rscRequest, CURLOPT_SSL_VERIFYPEER, false);
-      curl_setopt($rscRequest, CURLOPT_SSL_VERIFYHOST, false);
-      
-      curl_setopt($rscRequest, CURLINFO_HEADER_OUT, 1);
-      curl_setopt($rscRequest, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
-
-      // $sCurlResponse = curl_exec($rscRequest);
-      $arrCurlInfo   = curl_getinfo($rscRequest);
-      $nCurlError    = curl_errno($rscRequest);
-      
-      if (!empty($arrCurlInfo['redirect_url'])) {
-        $sSigninURL = $arrCurlInfo['redirect_url'];
-      } else {
-        $sSigninURL = $arrCurlInfo['url'];
-      }
-
-      if ($nCurlError) {
-        throw new Exception(__METHOD__.' throws exception making curl request to ebay for oauth redirect url.', $nCurlError);
-      }
-
-    } catch (Exception $objException) {
-      echo $objException->getMessage();
-    }
-
-    curl_close($rscRequest);
-    
-    return $sSigninURL;
+    return $this->_sGetAuthorizationEndpoint.'?'.http_build_query($arrQueryElements);
   }
   
   /**
