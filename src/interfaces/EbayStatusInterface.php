@@ -2,6 +2,7 @@
 namespace ebay\interfaces; 
 
 interface EbayStatusInterface {
+  const ERROR_IN_APP          = 0;
   const UNINITIALIZED         = 1;  // The app has never been used on this store
   const BEFORE_TOKEN          = 2;  // The app has been used but no token fetched 
   const AUTHORIZED            = 4;  // The app has been given permission by an eBay account holder to access their eBay account

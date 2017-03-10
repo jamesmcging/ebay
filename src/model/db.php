@@ -3,6 +3,10 @@ namespace ebay\model;
 use ebay\config\Credentials as Credentials;
 use PDO;
 
+/**
+ * Command to alter the marketplace table
+ * alter table marketplace change marketplace_type marketplace_type enum('google','affiliatefuture','googletxt','affiliatewindow','allurentondemand','optimum7','rockandsnow','tadashop','linkshare','amazon','ebay');
+ */
 class db {
 
 	private static $instance = NULL;

@@ -26,20 +26,10 @@ $app->group('/authorization', function() {
     return $objResponse->withJson($arrStatus, 200);
   });
   
-  $this->any('/accept', function(Request $objRequest, Response $objResponse) {
+  $this->get('/accept', function(Request $objRequest, Response $objResponse) {
     $objEbayAuthorization = new \ebay\classes\EbayAuthorization($this->objDB);
     
-    echo '<h3>Get Authentication Code Response</h3>';
-    echo "<pre>";
-    print_r($_REQUEST);
-    echo "</pre>";
-    echo '<hr>';
-    
-    
-    $objEbayAuthorization->setAccessToken($_REQUEST['code']);
-    
-    
-    return $objResponse->getBody()->write(json_encode($objEbayAuthorization), 200);
+    $objEbayAuthorization->setAccessToken($objRequest->getQueryParams());
     
     // At this stage we should have a token we can use for eBay API calls so we
     // redirect the user back to the app

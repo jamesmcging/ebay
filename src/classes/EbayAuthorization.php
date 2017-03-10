@@ -13,7 +13,7 @@ class EbayAuthorization implements EbayStatus {
   private $_sClientId                 = '';
   private $_sClientSecret             = '';
   private $_sRuName                   = '';
-  public $_sEbayAuthorizationCode     = '';
+  private $_sEbayAuthorizationCode    = '';
   private $_sEbayTokenRequestEndpoint = '';
   private $_sGetAuthorizationEndpoint = '';
   
@@ -21,10 +21,26 @@ class EbayAuthorization implements EbayStatus {
   private $_bEbayStatus = EbayStatus::UNINITIALIZED;
   
   // The user token that we use to make API calls
-  private $_objEbayUserToken          = null;
+  private $_arrUserToken = array(
+    'sAccessToken'           => '',
+    'sTokenType'             => '',
+    'sAccessToken'           => '',
+    'nExpiresIn'             => 0,
+    'sRefreshToken'          => '',
+    'nRefreshTokenExpiresIn' => 0,
+    'nTokenExpiresAt'        => 0,
+    'nRefreshTokenExpiresAt' => 0,
+  );
   
   // Local copy of the PDO DB access object
-  private $_objDB                     = null;
+  private $_objDB        = null;
+  
+  // We leave clues for dev in the DB
+  private $_sMessageInDB = '';
+  
+  // We give the user five minutes of wriggle room, if the token is due to 
+  // expire in these five minutes we renew the user token.
+  const SAFE_WINDOW = 300;
   
   public function __construct($objDB) {
     $this->_objDB = $objDB;
@@ -43,7 +59,30 @@ class EbayAuthorization implements EbayStatus {
       $this->_sGetAuthorizationEndpoint = 'https://signin.sandbox.ebay.com/authorize';
     }
     
-    $this->getCurrentAuthorization();
+    // we then ask the db for a user token
+    $sQuery = 'SELECT * FROM marketplace WHERE marketplace_type="ebay"';
+    $objStatement = $this->_objDB->prepare($sQuery);
+    if ($objStatement->execute()) {
+      // Data pulled back as an associative array
+      $arrData = $objStatement->fetch(\PDO::FETCH_ASSOC);
+    
+      // The user token is a json string in marketplace_data
+      $sUserToken = $arrData['marketplace_data'];
+      
+      // convert the json into an associative array
+      $arrDbTokenData = json_decode($sUserToken, true);
+      
+      if (is_array($arrDbTokenData)) {
+        // transfer the marketplace_data entry into the object variables
+        $this->_arrUserToken = array_replace($this->_arrUserToken, $arrDbTokenData);
+        
+      } else {
+        die('bad jeebies at line '.__LINE__);
+      }
+    }
+    
+    // now that we have token data we try to set the status
+    $this->setStatus();
   }
   
   /**
@@ -53,16 +92,15 @@ class EbayAuthorization implements EbayStatus {
    * @return type
    * @throws Exception
    */
-  public function requestSigninURL() {
-    $sSigninURL = false;
-        
+  public function requestSigninURL() {        
     $arrQueryElements = array(
       'client_id'     => $this->_sClientId,
-      'redirect_uri'  => $this->_sRuName,
       'response_type' => 'code',
-      'scope'         => 'https://api.ebay.com/oauth/api_scope/sell.inventory', //https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/buy.order.readonly https://api.ebay.com/oauth/api_scope/buy.guest.order https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly',
+      'redirect_uri'  => $this->_sRuName,
+      'scope'         => Credentials::EBAY_SCOPE,
       'state'         => '12345'
     );
+    
     return $this->_sGetAuthorizationEndpoint.'?'.http_build_query($arrQueryElements);
   }
   
@@ -70,10 +108,10 @@ class EbayAuthorization implements EbayStatus {
    * When eBay returns a succesfully authenticated user to our app, it returns
    * an authorization code. We use this to request an access token.
    * 
-   * @param string $sAuthorizationCode
+   * @param string $arrQueryParams
    */
-  public function setAccessToken($sAuthorizationCode) {    
-    $this->_sEbayAuthorizationCode = $sAuthorizationCode;
+  public function setAccessToken($arrQueryParams) {    
+    $this->_sEbayAuthorizationCode = $arrQueryParams['code'];
     
     // Now we exchange the authorization code for a user token.
     return $this->requestUserToken();
@@ -83,182 +121,201 @@ class EbayAuthorization implements EbayStatus {
    * Function charged with getting a user token using the previously fetched
    * authorization code. This is the second step of the OAuth procedure.
    * 
-   * 
-   * 
-   * 
-   * HTTP method:   POST
-  URL (Sandbox): https://api.sandbox.ebay.com/identity/v1/oauth2/token
-
-  HTTP headers:
-    Content-Type = application/x-www-form-urlencoded
-    Authorization = Basic <B64-encoded-oauth-credentials>
-
-  Request body (wrapped for readability):
-    grant_type=authorization_code&
-    code=<authorization-code-value>&
-    redirect_uri=<RuName-value>
    */
   public function requestUserToken() {
     $bOutcome = false;
 
     if (strlen($this->_sEbayAuthorizationCode)) {
 
+      // The way it should be done
       $arrData = http_build_query(array(
-          'grant_type'   => 'authorization_code',
-          'code'         => $this->_sEbayAuthorizationCode,
-          'redirect_uri' => $this->_sRuName
+        'grant_type'   => 'authorization_code',
+        'code'         => $this->_sEbayAuthorizationCode,
+        'redirect_uri' => $this->_sRuName
       ));
 
       $rscConnection = curl_init();
       curl_setopt($rscConnection, CURLOPT_URL, $this->_sEbayTokenRequestEndpoint);
       curl_setopt($rscConnection, CURLOPT_HTTPHEADER, array(
-        sprintf('Authorization: Basic %s', base64_encode(sprintf('%s:%s', $this->_sClientId, $this->_sClientSecret))),
+        'Authorization: Basic '.base64_encode($this->_sClientId.':'.$this->_sClientSecret),  
         'Content-Type: application/x-www-form-urlencoded',
-        //'Accept: application/json'
       ));
 
-//      curl_setopt($rscConnection, CURLOPT_USERPWD, "$this->_sClientId:$this->_sClientSecret");
-      
       curl_setopt($rscConnection, CURLOPT_SSL_VERIFYPEER, 0);
-//      curl_setopt($rscConnection, CURLOPT_SSL_VERIFYHOST, 0);
       curl_setopt($rscConnection, CURLOPT_RETURNTRANSFER, 1);
       curl_setopt($rscConnection, CURLOPT_POST, 1);
       curl_setopt($rscConnection, CURLOPT_POSTFIELDS, $arrData);
-      
       curl_setopt($rscConnection, CURLINFO_HEADER_OUT, 1);
-      curl_setopt($rscConnection, CURLOPT_HEADER, true); // Display headers
-      curl_setopt($rscConnection, CURLOPT_VERBOSE, true); // Display communication with server
+      
+      // The following two lines will cause the json_decode below to fail as 
+      // the sResponse include non-json elements (the header data)
+      if ($this->bDebug) {
+        curl_setopt($rscConnection, CURLOPT_HEADER, true); // Display headers
+        curl_setopt($rscConnection, CURLOPT_VERBOSE, true); // Display communication with server
+      }
       
       $sResponse = curl_exec($rscConnection);
-      
-      echo '<h3>Request for user token</h3>';
-      echo '<b>Headers</b>';
-      echo "<pre>";
-      print_r(curl_getinfo($rscConnection, CURLINFO_HEADER_OUT));
-      echo "</pre>";   
-      echo '<b>Body</b>';
-      echo '<p>'.$arrData.'</p>';
-      echo '<hr>';
-      
-      echo '<h3>Response</h3>';
-      echo '<b>Raw</b>';
-      echo '<p>'.$sResponse.'</p>';
-      echo '<hr>';
-      
-      echo '<b>Info</b>';
-      echo "<pre>";
-      print_r(curl_getinfo($rscConnection));
-      echo "</pre>";
-      
-      $curl_error = curl_errno($rscConnection);
-      if ($curl_error) {
-        $curl_error = curl_error($rscConnection);
-        echo '<h3>Curl Errors</h3>';
-        echo $curl_error;
-        echo '<hr>';
-      }
-
-
-      
-
-      
-   
-      
-      die();
-      
-      
-      
-      
-      
-      
-      $this->sResponse = $sResponse;
 
       curl_close($rscConnection);
 
       $arrResponse = json_decode($sResponse, true);
       
-      if (!empty($arrResponse['error'])) {
-        $this->_sEbayUserToken   = isset($arrResponse['access_token']) ? $arrResponse['access_token'] : '';
-        $this->_sTokenType       = isset($arrResponse['token_type']) ? $arrResponse['token_type'] : '';
+      if (!empty($arrResponse['errors'])) {
+        $this->_sMessageInDB = 'User token request failed errors: '.print_r($arrResponse['errors'], 1);
+        $this->_bEbayStatus = self::ERROR_IN_APP;
         
-        if (isset($arrResponse['expires_in'])) {
-          $nTTL = (int)$arrResponse['expires_in'];
-          $this->_nTokenExpiryDate = time() + $nTTL;
-        }
-        
-        $this->_sRefreshToken    = isset($arrResponse['refresh_token']) ? $arrResponse['refresh_token'] : '';
-        if (isset($arrResponse['refresh_token_expires_in'])) {
-          $nTTL = (int)$arrResponse['refresh_token_expires_in'];
-          $this->_nRefreshTokenExpiryDate = time() + $nTTL;
-        }
+      } else {
+        $this->_arrUserToken['sAccessToken']           = $arrResponse['access_token'];
+        $this->_arrUserToken['sTokenType']             = $arrResponse['token_type'];
+        $this->_arrUserToken['nExpiresIn']             = $arrResponse['expires_in']; 
+        $this->_arrUserToken['sRefreshToken']          = $arrResponse['refresh_token'];
+        $this->_arrUserToken['nRefreshTokenExpiresIn'] = $arrResponse['refresh_token_expires_in'];
 
-        if (strlen($this->_sEbayUserToken)) {
-          $bOutcome = $this->saveAuthorization();
-        }
+        $this->_arrUserToken['nTokenExpiresAt']        = time() + $this->_arrUserToken['nExpiresIn'];
+        $this->_arrUserToken['nRefreshTokenExpiresAt'] = time() + $this->_arrUserToken['nRefreshTokenExpiresIn'];
+
+        $this->setStatus();
+        $this->_sMessageInDB = 'User token successfully requested';
       }
+      
+      // Save our status to the db, this includes a user token
+      $bOutcome = $this->saveAuthorization();
       
     }
     return $bOutcome;
   }
+ 
+  /**
+   * Function charged with updating $this->bEBayStatus depending on the
+   * values currently in $this->_arrUserToken. If the user token is out of date 
+   * or due to be out of date shortly, it attempts to renew it.
+   * 
+   * @return EBayStatus
+   */
+  private function setStatus() {
+    // If we have no token we are in virgin territory
+    if (strlen($this->_arrUserToken['sAccessToken']) === 0) {
+      $this->_bEbayStatus = self::UNINITIALIZED;
+
+    // If we have a token...
+    } else {
+      // we check if it has or is about to expire
+      if (!empty($this->_arrUserToken['sRefreshToken']) 
+          && (int)$this->_arrUserToken['nTokenExpiresAt'] + self::SAFE_WINDOW < time()) {
+        $this->renewAccessToken();
+
+      // otherwise we deem the user access token to be valid
+      } else {
+        $this->_bEbayStatus = self::AUTHORIZED;
+      }
+    }
+
+    return $this->_bEbayStatus;
+  }
 
   /**
-   * Function charged with returning a user token for the front end to use in 
-   * REST calls to eBay.
+   * Method charged with updating $this->_bEbayStatus depending on 
+   * $this->_arrUserToken
    * 
    * @return type
    */
-  public function getUserToken() {
-    return $this->_sEbayUserToken;
-  }
-  
   public function getStatus() {
     return $this->_bEbayStatus;
   }
   
   /**
-   * function charged with fetching the current authorization from the DB
+   * Function charged with updating the current user token.
+   * 
+   * @return EbayStatus
    */
-  private function getCurrentAuthorization() {
-    $sQuery = 'SELECT * FROM marketplace WHERE marketplace_type="ebay"';
-    $objStatement = $this->_objDB->prepare($sQuery);
-    if ($objStatement->execute()) {
-      $arrData = $objStatement->fetch(\PDO::FETCH_ASSOC);
-      if (strlen($arrData['marketplace_data'])) {
-        $this->_objEbayUserToken = unserialize($arrData['marketplace_data']);
-        
-        // Ask the token to ensure it is up to date
-        if ($this->_objEbayUserToken->update()) {
-          $this->_bEbayStatus = EbayStatus::UNAUTHORIZED;
-          
-        // If we failed to refresh the token...
-        } else {
-          $this->_bEbayStatus = EbayStatus::ACCESS_TOKEN_EXPIRED;
-        }
-        
-      } else {
-        $this->_bEbayStatus = EbayStatus::UNINITIALIZED;
+  private function renewAccessToken() {
+
+    // If the refresh token has expired then the user is going to have to give
+    // us permissions again.
+    if (!empty($this->_arrUserToken['nRefreshTokenExpiresAt']) 
+        && $this->_arrUserToken['nRefreshTokenExpiresAt'] < time()) {
+      $this->_bEbayStatus = EbayStatus::REFRESH_TOKEN_EXPIRED;
+
+    // Otherwise we use the refresh token to ask Ebay for a new User Access 
+    // token
+    } else {
+      // The way it should be done
+      $arrData = http_build_query(array(
+        'grant_type'   => 'refresh_token',
+        'code'         => $this->_arrUserToken['sRefreshToken'],
+        'scope'        => Credentials::EBAY_SCOPE
+      ));
+
+      $rscConnection = curl_init();
+      curl_setopt($rscConnection, CURLOPT_URL, $this->_sEbayTokenRequestEndpoint);
+      curl_setopt($rscConnection, CURLOPT_HTTPHEADER, array(
+        'Authorization: Basic '.base64_encode($this->_sClientId.':'.$this->_sClientSecret),  
+        'Content-Type: application/x-www-form-urlencoded',
+      ));
+
+      curl_setopt($rscConnection, CURLOPT_SSL_VERIFYPEER, 0);
+      curl_setopt($rscConnection, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($rscConnection, CURLOPT_POST, 1);
+      curl_setopt($rscConnection, CURLOPT_POSTFIELDS, $arrData);
+
+      curl_setopt($rscConnection, CURLINFO_HEADER_OUT, 1);
+      
+      // The following two lines will cause the json_decode below to fail as 
+      // the sResponse include non-json elements (the header data)
+      if ($this->bDebug) {
+        curl_setopt($rscConnection, CURLOPT_HEADER, true); // Display headers
+        curl_setopt($rscConnection, CURLOPT_VERBOSE, true); // Display communication with server
       }
       
-    } else {
-      $this->_bEbayStatus = EbayStatus::UNINITIALIZED;
+      $sResponse = curl_exec($rscConnection);
+
+      $this->sResponse = $sResponse;
+
+      curl_close($rscConnection);
+
+      $arrResponse = json_decode($sResponse, true);
+
+      if (!empty($arrResponse['errors'])) {
+        $this->_bEbayStatus = self::ERROR_IN_APP;
+        $this->_sMessageInDB = 'User token refresh failed errors: '.print_r($arrResponse['errors'], 1);
+        
+      } else {
+        $this->_arrUserToken['sAccessToken']    = isset($arrResponse['access_token']) ? $arrResponse['access_token'] : '';
+        $this->_arrUserToken['sTokenType']      = isset($arrResponse['token_type'])   ? $arrResponse['token_type']   : '';
+        $this->_arrUserToken['nExpiresIn']      = isset($arrResponse['expires_in'])   ? $arrResponse['expires_in']   : 0;
+        $this->_arrUserToken['nTokenExpiresAt'] = time() + $this->_arrUserToken['nExpiresIn'];
+
+        $this->_bEbayStatus = self::AUTHORIZED;
+        $this->_sMessageInDB = 'User token successfully refreshed'; 
+      }
+      // Save our status to the db, this includes a user token
+      $this->saveAuthorization();
     }
+
+    return $this->_bEbayStatus;
   }
   
+  /**
+   * Function charged with saving the current ebay set up, this stuffs the user
+   * token into marketplace_data as a json encoded array.
+   * 
+   * @return type
+   */
   private function saveAuthorization() {
     
       $sQuery = "
         INSERT INTO marketplace(
-          marketplace_type, 
-          marketplace_webstoreid, 
-          marketplace_data, 
-          marketplace_enabled, 
+          marketplace_type,
+          marketplace_webstoreid,
+          marketplace_data,
+          marketplace_enabled,
           marketplace_nextrefresh, 
           marketplace_lastmessage, 
           marketplace_categorization)
         VALUES(
           'ebay', 
           '".Credentials::STORE_ID."',
-          '".serialize($this->_objEbayUserToken)."',
+          '".json_encode($this->_arrUserToken)."',
           '".$this->_bEbayStatus."',
           0,
           'Ebay marketplace entry added to DB',
@@ -267,14 +324,13 @@ class EbayAuthorization implements EbayStatus {
         ON DUPLICATE KEY UPDATE 
           marketplace_type           = 'ebay', 
           marketplace_webstoreid     = '".Credentials::STORE_ID."', 
-          marketplace_data           = '".serialize($this->_objEbayUserToken)."', 
-          marketplace_enabled        = '".$this->_bEbayStatus."',  
+          marketplace_data           = '".json_encode($this->_arrUserToken)."', 
+          marketplace_enabled        = '{$this->_bEbayStatus}',  
           marketplace_nextrefresh    = '0', 
-          marketplace_lastmessage    = 'marketplace_data entry updated @".time()."'
+          marketplace_lastmessage    = '{$this->_sMessageInDB} (updated @".time().")'
       ";
-            
+      
       $objStatement = $this->_objDB->prepare($sQuery);
       return $objStatement->execute();
-
   }
 }
