@@ -18,12 +18,12 @@ function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, ob
   objDashboard.objChildPanels = {
     summarypanel     : objSummaryPanel,
     credentialspanel : objCredentialsPanel,
-    policiespanel    : objPoliciesPanel,
+    //policiespanel    : objPoliciesPanel,
     locationspanel   : objLocationsPanel
   };
   objDashboard.objStatusPanels = {
     credentialspanel : objCredentialsPanel,
-    policiespanel    : objPoliciesPanel,
+    //policiespanel    : objPoliciesPanel,
     locationspanel   : objLocationsPanel
   };  
   
@@ -46,7 +46,7 @@ function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, ob
     sHTML += objSummaryPanel.getPanelMarkup();
     sHTML += '</div><!-- .col-md-8 -->';
     
-    /* The left hand side panel */
+    /* The right hand side panel */
     sHTML += '<div class="col-md-4">';
     for (var sPanelCode in objDashboard.objStatusPanels) {
       sHTML += objDashboard.objStatusPanels[sPanelCode].getPanelMarkup();

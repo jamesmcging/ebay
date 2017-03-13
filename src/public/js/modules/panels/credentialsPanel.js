@@ -10,7 +10,11 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
   objCredentialsPanel.objChildPanels = {};
   
   objCredentialsPanel.initialize = function() {
-    nsc('#credential-panel-status').html('<p>Updating</p>');
+    
+    nsc('#'+this.sCode+'-status-text').text('Updating...');
+    
+    objCredentialsPanel.setUpdating();
+    
     /* Ask the server if we have an eBay token */    
     var jqxhr = nsc.ajax({
       url      : '/authorization/status',
@@ -23,9 +27,20 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
 
       objCredentialsPanel.objSettings.nStatus = responsedata['ebay_authorization_status'];
       
-      objCredentialsPanel.objSettings.bActive = (objCredentialsPanel.objSettings.nStatus === 4) ? true : false;
+      if (objCredentialsPanel.objSettings.nStatus === 4) {
+        objCredentialsPanel.objSettings.bActive = true;
+      } else {
+        objCredentialsPanel.objSettings.bActive = false;
+      }
       
       objCredentialsPanel.render();
+
+      if (objCredentialsPanel.objSettings.bActive) {
+        nsc('#'+objCredentialsPanel.sCode+'-status-text').text('Signed in and ready to go!');        
+      } else {
+        nsc('#'+objCredentialsPanel.sCode+'-status-text').text('Click here to give us permission to act on your behalf.');
+      }
+      
     });
     
     jqxhr.fail(function(xhr, status, errorThrown) {
@@ -36,30 +51,33 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
     });
   };
   
-  objCredentialsPanel.getPanelContent = function() {
-    
-    var sActiveClass = (this.objSettings.bActive) ? 'status-panel-active' : 'status-panel-inactive';    
-    
+  objCredentialsPanel.getPanelContent = function() {    
     var sHTML = '';
     
-    sHTML += '<div class="panel panel-default status-panel '+sActiveClass+'" id="'+this.sCode+'">';
-    sHTML += '<h3>'+this.sName+'</h3>';
+    sHTML += '<div class="row">';
     
-    sHTML += '<p id="credential-panel-status">';
+    sHTML += '<div class="col-sm-2">';
+    sHTML += '<span class="status-panel-icon" id="'+this.sCode+'-status-icon"></span>';
+    sHTML += '</div>';
+    
+    sHTML += '<div class="col-sm-10">';
+    sHTML += '<h3 id="'+this.sCode+'-status-title">'+this.sName+'</h3>';
+    sHTML += '<p id="'+this.sCode+'-status-text">';
     if (this.objSettings.bActive) {
       sHTML += 'Credentials valid, able to talk to eBay on your behalf.';
     } else {
       sHTML += 'Click to login to eBay and give us permission to act on your behalf.';
     }
     sHTML += '</p>';
-    
     sHTML += '</div>';
     
+    sHTML += '</div><!-- .row -->';
+
     return sHTML;
   };
   
   objCredentialsPanel.setListeners = function() {
-    nsc('#'+this.sCode).off().on('click', function() {
+    nsc('#'+this.sCode+'-panel').off().on('click', function() {
       objCredentialsPanel.showModal();
       objCredentialsPanel.setListeners();
     });

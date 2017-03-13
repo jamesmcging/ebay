@@ -22,16 +22,13 @@
   background-color: #f2dede;
   color: #b94a48;
 }
-.status-panel-active:before {
-  content:'\f00c';font-family:'FontAwesome';float:left;width:25px;height:45px;font-size:35px;clear:both;line-height:35px;
-}
-.status-panel-inactive:before {
-  content:'\f12a';font-family:'FontAwesome';float:left;width:25px;height:45px;font-size:35px;clear:both;line-height:35px;
+.status-panel-icon {
+  margin-top:20px;  
 }
 
 .status-panel-link {}
 
-.bordered-panel{
+.bordered-panel {
   border: 1px solid #ccc;
   margin-bottom: 5px;
 }

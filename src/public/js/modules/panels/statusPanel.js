@@ -28,5 +28,50 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   
   objStatusPanel.setListeners = function() {};
   
+  objStatusPanel.render = function() {
+    objPanel.render();
+    
+    if (objStatusPanel.objSettings.bActive) {
+      this.setActive();
+    } else {
+      this.setInactive();
+    }
+    
+  };
+  
+  objStatusPanel.getPanelMarkup = function() {
+    var sHTML = '';
+    sHTML += '<div id="'+this.sCode+'-panel" class="status-panel">';
+    sHTML += this.getPanelContent();
+    sHTML += '</div>';
+    return sHTML;
+  };
+  
+  objStatusPanel.setActive = function() {
+    nsc('#'+this.sCode+'-panel').removeClass();
+    nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-active');
+    
+    nsc('#'+this.sCode+'-status-icon').removeClass();
+    nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-check');
+  };
+  
+  objStatusPanel.setInactive = function() {
+    nsc('#'+this.sCode+'-panel').removeClass();
+    nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-inactive');
+    
+    nsc('#'+this.sCode+'-status-icon').removeClass();
+    nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-times');
+  };
+  
+  objStatusPanel.setUpdating = function() {
+    nsc('#'+this.sCode+'-panel').removeClass();
+    nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-updating');
+    
+    nsc('#'+this.sCode+'-status-icon').removeClass();
+    nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-refresh fa-spin fa-fw');
+    
+    nsc('#'+this.sCode+'-status-text').html('Updating...');
+  };
+  
   return objStatusPanel;
 });

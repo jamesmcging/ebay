@@ -42,6 +42,11 @@ class EbayAuthorization implements EbayStatus {
   // expire in these five minutes we renew the user token.
   const SAFE_WINDOW = 300;
   
+  // Hadny for figuring out what is wrong with the curl requests - will cause 
+  // the interface to fail as it spits out the curl response in verbose form to
+  // the front end
+  private $bDebug = false;
+  
   public function __construct($objDB) {
     $this->_objDB = $objDB;
     
