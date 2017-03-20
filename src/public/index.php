@@ -25,6 +25,7 @@ $container['objDB'] = function () {
   return model\db::getInstance();
 };
 
+require '../routes/ebay_api.php';
 require '../routes/homepage.php';
 require '../routes/authorization.php';
 

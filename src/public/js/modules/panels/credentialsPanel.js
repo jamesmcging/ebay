@@ -24,7 +24,6 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
     });
 
     jqxhr.done(function(responsedata) {
-
       objCredentialsPanel.objSettings.nStatus = responsedata['ebay_authorization_status'];
       
       if (objCredentialsPanel.objSettings.nStatus === 4) {

@@ -68,21 +68,26 @@ class EbayAuthorization implements EbayStatus {
     $sQuery = 'SELECT * FROM marketplace WHERE marketplace_type="ebay"';
     $objStatement = $this->_objDB->prepare($sQuery);
     if ($objStatement->execute()) {
-      // Data pulled back as an associative array
-      $arrData = $objStatement->fetch(\PDO::FETCH_ASSOC);
-    
-      // The user token is a json string in marketplace_data
-      $sUserToken = $arrData['marketplace_data'];
       
-      // convert the json into an associative array
-      $arrDbTokenData = json_decode($sUserToken, true);
-      
-      if (is_array($arrDbTokenData)) {
-        // transfer the marketplace_data entry into the object variables
-        $this->_arrUserToken = array_replace($this->_arrUserToken, $arrDbTokenData);
-        
-      } else {
-        die('bad jeebies at line '.__LINE__);
+      $sth->execute();
+
+      if ($sth->columnCount()) {
+        // Data pulled back as an associative array
+        $arrData = $objStatement->fetch(\PDO::FETCH_ASSOC);
+
+        // The user token is a json string in marketplace_data
+        $sUserToken = $arrData['marketplace_data'];
+
+        // convert the json into an associative array
+        $arrDbTokenData = json_decode($sUserToken, true);
+
+        if (is_array($arrDbTokenData)) {
+          // transfer the marketplace_data entry into the object variables
+          $this->_arrUserToken = array_replace($this->_arrUserToken, $arrDbTokenData);
+
+        } else {
+          die('bad jeebies in  '.__METHOD__.' at line '.__LINE__);
+        }
       }
     }
     
@@ -120,6 +125,10 @@ class EbayAuthorization implements EbayStatus {
     
     // Now we exchange the authorization code for a user token.
     return $this->requestUserToken();
+  }
+  
+  public function getUserToken() {
+    return $this->_arrUserToken['sAccessToken'];
   }
   
   /**
@@ -208,7 +217,7 @@ class EbayAuthorization implements EbayStatus {
       if (!empty($this->_arrUserToken['sRefreshToken']) 
           && (int)$this->_arrUserToken['nTokenExpiresAt'] + self::SAFE_WINDOW < time()) {
         $this->renewAccessToken();
-
+        
       // otherwise we deem the user access token to be valid
       } else {
         $this->_bEbayStatus = self::AUTHORIZED;
