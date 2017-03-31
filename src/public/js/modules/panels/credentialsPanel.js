@@ -28,6 +28,7 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
       
       if (objCredentialsPanel.objSettings.nStatus === 4) {
         objCredentialsPanel.objSettings.bActive = true;
+        
       } else {
         objCredentialsPanel.objSettings.bActive = false;
       }
@@ -40,6 +41,8 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
         nsc('#'+objCredentialsPanel.sCode+'-status-text').text('Click here to give us permission to act on your behalf.');
       }
       
+      /* We announce this momentious event so other panels can start their work */
+      nsc(document).trigger('credentialsPanelUpdated', [objCredentialsPanel.objSettings.nStatus, objCredentialsPanel.objSettings.bActive]);
     });
     
     jqxhr.fail(function(xhr, status, errorThrown) {

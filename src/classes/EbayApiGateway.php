@@ -23,6 +23,7 @@ class EbayApiGateway implements EbayStatus {
   private $_sURL        = '';
   private $_sAPIName    = '';
   private $_sResource   = '';
+  private $_sResourceId = '';
   private $_sApiVersion = 'v1';
   private $_sMethod     = 'GET';
   private $_arrParams   = array();
@@ -47,7 +48,7 @@ class EbayApiGateway implements EbayStatus {
   
   public function setRestMethod($sMethod) {    
     if (in_array(strtoupper($sMethod), array('GET', 'POST', 'DELETE'))) {
-      $this->_sMethod = $sMethod;
+      $this->_sMethod = strtoupper($sMethod);
     }
     return $this;
   }
@@ -61,6 +62,11 @@ class EbayApiGateway implements EbayStatus {
   
   public function setRestResource($sResource) {
     $this->_sResource = $sResource;
+    return $this;
+  }
+
+  public function setResourceId($sID) {
+    $this->_sResourceId = $sID;
     return $this;
   }
   
@@ -88,7 +94,10 @@ class EbayApiGateway implements EbayStatus {
       
       // Set the URI we'll be talking to. It should be formated so:
       // https://DOMAIN/API_NAME/API_VERSION/RESOURCE/[ID]*?*PARAMS*
-      $sCurlURL = $this->_sURL.$this->_sAPIName.'/'.$this->_sApiVersion.'/'.$this->_sResource.'/';
+      $sCurlURL = $this->_sURL.'sell/'.$this->_sAPIName.'/'.$this->_sApiVersion.'/'.$this->_sResource;
+      
+      // If the call requires any other URL identifiers, we add them now
+      $sCurlURL .= (strlen($this->_sResourceId)) ? '/'.$this->_sResourceId : '';
       
       // Set the authorization header
       curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
@@ -100,14 +109,17 @@ class EbayApiGateway implements EbayStatus {
       if ($this->_sMethod === 'POST') {
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
         curl_setopt($rscCurl, CURLOPT_POST, 1);
-        curl_setopt($rscCurl, CURLOPT_POSTFIELDS, $this->_arrParams);
+        curl_setopt($rscCurl, CURLOPT_POSTFIELDS, json_encode($this->_arrParams));
         
       } elseif ($this->_sMethod === 'DELETE') {
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
         curl_setopt($rscCurl, CURLOPT_CUSTOMREQUEST, "DELETE");
         
       } else {
-        curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL.'?'.http_build_query($this->_arrParams));
+        if (count($this->_arrParams)) {
+          $sCurlURL = $sCurlURL.'?'.http_build_query($this->_arrParams);
+        }
+        curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
       }
       
       curl_setopt($rscCurl, CURLOPT_RETURNTRANSFER, true);
@@ -122,6 +134,8 @@ class EbayApiGateway implements EbayStatus {
       // Otherwise we have the data we're looking for
       } else {
         $sResult = json_decode($sResult);
+        $this->_arrResponse['bOutcome']         = true;
+        $this->_arrResponse['nResponseCode']    = curl_getinfo($rscCurl, CURLINFO_HTTP_CODE);
         $this->_arrResponse['sResponseMessage'] = $sResult;
       }
       
@@ -134,7 +148,11 @@ class EbayApiGateway implements EbayStatus {
     }
     
     if ($this->_bDebug) {
-      $this->_arrResponse['dev'] = print_r($this, 1);
+      $this->_arrResponse['dev'] = array(
+        'url'    => $sCurlURL,
+        'method' => $this->_sMethod,
+        'params' => $this->_arrParams,
+      );
     }
     
     return $this->_arrResponse;

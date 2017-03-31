@@ -66,28 +66,21 @@ class EbayAuthorization implements EbayStatus {
     
     // we then ask the db for a user token
     $sQuery = 'SELECT * FROM marketplace WHERE marketplace_type="ebay"';
-    $objStatement = $this->_objDB->prepare($sQuery);
-    if ($objStatement->execute()) {
+    $arrData = $this->_objDB->query($sQuery)->fetchAll();
+    if ($arrData) {
       
-      $sth->execute();
+      // The user token is a json string in marketplace_data
+      $sUserToken = $arrData[0]['marketplace_data'];
 
-      if ($sth->columnCount()) {
-        // Data pulled back as an associative array
-        $arrData = $objStatement->fetch(\PDO::FETCH_ASSOC);
+      // convert the json into an associative array
+      $arrDbTokenData = json_decode($sUserToken, true);
 
-        // The user token is a json string in marketplace_data
-        $sUserToken = $arrData['marketplace_data'];
+      if (is_array($arrDbTokenData)) {
+        // transfer the marketplace_data entry into the object variables
+        $this->_arrUserToken = array_replace($this->_arrUserToken, $arrDbTokenData);
 
-        // convert the json into an associative array
-        $arrDbTokenData = json_decode($sUserToken, true);
-
-        if (is_array($arrDbTokenData)) {
-          // transfer the marketplace_data entry into the object variables
-          $this->_arrUserToken = array_replace($this->_arrUserToken, $arrDbTokenData);
-
-        } else {
-          die('bad jeebies in  '.__METHOD__.' at line '.__LINE__);
-        }
+      } else {
+        die('bad jeebies in  '.__METHOD__.' at line '.__LINE__.' the user token is corrupt.');
       }
     }
     

@@ -55,6 +55,10 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-check');
   };
   
+  objStatusPanel.getIsPanelActive = function() {
+    return objStatusPanel.objSettings.bActive;
+  };
+  
   objStatusPanel.setInactive = function() {
     nsc('#'+this.sCode+'-panel').removeClass();
     nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-inactive');
@@ -71,6 +75,10 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-refresh fa-spin fa-fw');
     
     nsc('#'+this.sCode+'-status-text').html('Updating...');
+  };
+  
+  objStatusPanel.getSettings = function() {
+    return this.objSettings;
   };
   
   return objStatusPanel;

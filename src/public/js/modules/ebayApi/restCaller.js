@@ -2,24 +2,36 @@ define(['jquery'], function(nsc) {
    
   var objRestApi = {};
     
-  objRestApi.makeCall = function(sMethod, sApiName, sResource, objParams, sCallBackFunction) {
-    
+  /**
+   * 
+   * @param {string} sMethod
+   * @param {string} sApiName
+   * @param {string} sResource
+   * @param {string} sResourceId
+   * @param {string} objCallParams
+   * @param {string} sCallBackFunction
+   * @returns {undefined}
+   */
+  objRestApi.makeCall = function(sMethod, sApiName, sResource, sResourceId, objCallParams, sCallBackFunction) {
+
     var objParams = {
       setMethod     : sMethod,
       setApiName    : sApiName,
       setApiVersion : 1,
       setResource   : sResource,
-      setApiParams  : objParams
+      setResourceId : sResourceId,
+      setApiParams  : objCallParams
     };
-    
+
     var jqxhr = nsc.ajax({
       url      : '/ebay/',
       data     : objParams,
       dataType : 'json',
-      type     : 'get',
+      type     : 'get'
     });
 
     jqxhr.done(function(responsedata) {
+      responsedata.bOutcome = true;
       sCallBackFunction(responsedata);
     });
     
@@ -29,7 +41,7 @@ define(['jquery'], function(nsc) {
       console.log(status);
       console.log(errorThrown);
       xhr.bOutcome = false;
-      sCallBackFunction(xhr.responseText);
+      sCallBackFunction(xhr);
     });
   };
 
