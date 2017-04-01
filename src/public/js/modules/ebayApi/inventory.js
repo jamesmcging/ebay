@@ -39,5 +39,10 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
     this.makeCall('delete', objInventoryApi.sApiName, 'location', sLocationKey, null, sCallbackFunction);
   };
   
+  objInventoryApi.updateLocation = function(sLocationKey, sSerializedData, sCallbackFunction) {
+    // POST https://api.ebay.com/sell/inventory/v1/location/{merchantLocationKey}/update_location_details
+    this.makeCall('post', objInventoryApi.sApiName, 'location', sLocationKey+'/update_location_details', sSerializedData, sCallbackFunction);
+  };
+  
   return objInventoryApi;
 });

@@ -8,11 +8,11 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   objSummaryPanel.sCode = 'summarypanel';
 
   objSummaryPanel.objChildPanels = {};
-  objSummaryPanel.objSettings.nStoreSkuCount = 'unknown';
-  objSummaryPanel.objSettings.nEbaySkuCount = 'unknown';
-  objSummaryPanel.objSettings.nEbayOfferCount = 'unknown';
+  objSummaryPanel.objSettings.nStoreSkuCount    = 'unknown';
+  objSummaryPanel.objSettings.nEbaySkuCount     = 'unknown';
+  objSummaryPanel.objSettings.nEbayOfferCount   = 'unknown';
   objSummaryPanel.objSettings.nEbayListingCount = 'unknown';
-  objSummaryPanel.objSettings.nEbayOrderCount = 'unknown';
+  objSummaryPanel.objSettings.nEbayOrderCount   = 'unknown';
   
   objSummaryPanel.initialize = function() {
     objSummaryPanel.refresh();
@@ -79,6 +79,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
 
     jqxhr.done(function(responsedata) {
       objSummaryPanel.objSettings.nStoreSkuCount = responsedata.nStoreSkuCount;
+      objSummaryPanel.objSettings.objStoreData    = responsedata.objStoreData;
       objSummaryPanel.render();
     });
     

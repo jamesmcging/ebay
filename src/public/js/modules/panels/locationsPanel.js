@@ -2,12 +2,14 @@ define([
   'jquery', 
   'modules/panels/statusPanel',
   'modules/panels/credentialsPanel',
-  'modules/ebayApi/inventory'],
+  'modules/ebayApi/inventory',
+  'modules/panels/summaryPanel'],
   function(
     nsc, 
     objStatusPanel,
     objCredentialsPanel,
-    objApiInventory) {
+    objApiInventory,
+    objSummaryPanel) {
    
   var objLocationsPanel = {};
 
@@ -72,7 +74,7 @@ define([
       var sLocationKey = nsc(this).data('locationkey');
       
       if (sLocationKey === 'newlocation') {
-        nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocationsPanel.objLocation));
+        nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objSummaryPanel.objSettings.objStoreData));
       } else {
         if (typeof (objLocationsPanel.objSettings.objLocations[sLocationKey]) !== 'undefined') {
           nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocationsPanel.objSettings.objLocations[sLocationKey]));
@@ -84,15 +86,20 @@ define([
       /* This listens for the button at the bottom of the new location form */
       nsc('#create-location').off().on('click', function() {
         if (nsc('#location-merchantLocationKey').val()) {
-          objLocationsPanel.createLocation();
+          if (/\s/.test(nsc('#location-merchantLocationKey').val())) {
+            alert('Your Location Key cannot contain spaces');
+          } else {
+            objLocationsPanel.createLocation();
+          }
         } else {
           alert('Please give the new location a key');
         }
       });
       
       /* This listens for the button at the bottom of the update location form */
-      nsc('#update-location').off().on('click', function() {
-        objLocationsPanel.updateLocation();
+      nsc('#update-location').off().on('click', function(event,  ele) {
+        var sLocationKey = nsc(event.target).data('merchantlocationkey');
+        objLocationsPanel.updateLocation(sLocationKey);
       });
     });
     
@@ -108,7 +115,7 @@ define([
       if ((nsc('#modal-anchor').data('bs.modal') || {}).isShown) {
         objLocationsPanel.refreshModal();
       } else {
-        console.log('locations retrieved but modal clsoed');
+        console.log('locations retrieved but modal closed');
       }
     });
     
@@ -127,7 +134,12 @@ define([
     nsc('.deletelocationbutton').on('click', function() {
       var sLocationKey = nsc(event.target).data('merchantlocationkey');
       objLocationsPanel.deleteLocation(sLocationKey);
-    }); 
+    });
+    
+    nsc('.amendlocation').on('click', function() {
+      var sLocationKey = nsc(event.target).data('merchantlocationkey');
+      nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocationsPanel.objSettings.objLocations[sLocationKey]));
+    });    
   };
   
   objLocationsPanel.getModalBodyMarkup = function() {
@@ -165,6 +177,7 @@ define([
       sHTML += '<li class="location-item list-group-item" data-locationkey="'+sLocationKey+'">';
       sHTML += '  <span class="location-name">' + objLocation.name + '</span>';
       sHTML += '  <span class="btn-group pull-right">';
+      sHTML += '    <button class="btn btn-default btn-xs amendlocation" data-merchantlocationkey="'+sLocationKey+'">Amend</button>';      
       sHTML += objLocationsPanel.getLocationEnabledButtonMarkup(objLocation);      
       sHTML += '    <button class="btn btn-danger btn-xs deletelocationbutton" data-merchantlocationkey="'+sLocationKey+'">Delete</button>';
       sHTML += '  </span>';
@@ -198,6 +211,10 @@ define([
     
     var bNewLocation = objLocation.merchantLocationKey.length === 0 ? true : false;
     
+    var sReadonly = (bNewLocation) ? '' : ' readonly';
+    
+    var sRequired = (bNewLocation) ? ' required' : ''; 
+    
     var sHTML = ''
     sHTML += '<div  id="location-form" class="panel panel-default">';
     sHTML += '  <div class="panel-heading">';
@@ -207,59 +224,61 @@ define([
     }
     sHTML += '  </div>';
     sHTML += '  <div class="panel-body">';
-    sHTML += '    <form name="location-form">';
+    
+    /* Some tips for the user */
+    if (bNewLocation) {
+      sHTML += '<div class="alert alert-warning">Take care filling out this fields, eBay only allows the following fields to be amended: Name, Phone, Store Website, Location Instructions and Additional Information</div>';
+    }
+
+    sHTML += '<form name="location-form">';
   
-    sHTML += '<div class="form-group">';
-    sHTML += '<label for="location-name">Location Name</label>';
+    sHTML += '<div class="form-group required">';
+    sHTML += '<label for="location-name">Name</label>';
     sHTML += '<input type="text" name="name" id="location-name" class="form-control" maxlength="1000" value="'+objLocation.name+'">';
     sHTML += '</div>';
 
     /* If we are creating a new location we need to be able to set this, 
      * otherwise, if we are viewing/updating a location, the key is immutable */
     if (bNewLocation) {
-      sHTML += '<div class="form-group">';
+      sHTML += '<div class="form-group required">';
       sHTML += '<label for="location-merchantLocationKey">Location Key</label>';
-      sHTML += '<input type="text" name="merchantLocationKey" id="location-merchantLocationKey" class="form-control" maxlength="36" value="'+objLocation.merchantLocationKey+'">';
+      sHTML += '<input type="text" name="merchantLocationKey" id="location-merchantLocationKey" class="form-control" maxlength="36" value="'+objLocation.merchantLocationKey+'" title="No spaces or any other funny characters please!">';
       sHTML += '</div>';
     }
-
-    // ENUM [ ENABLED | DISABLED ]
-    // commented this out for the moment as we deal with it in the location list
-//    var sChecked = (objLocation.merchantLocationStatus === 'ENABLED') ? ' checked="checked"' : '';
-//    sHTML += '<div class="checkbox">';
-//    sHTML += '<label>';
-//    sHTML += '<input type="checkbox" name="merchantLocationStatus" id="location-merchantLocationStatus"'+sChecked+'>Status';
-//    sHTML += '</label>';
-//    sHTML += '</div>';
     
-    sHTML += '<div class="form-group required">';
-    sHTML += '<label for="location-address-addressLine1" class="required">Address 1</label>';
-    sHTML += '<input type="text" name="addressLine1" id="location-address-addressLine1" class="form-control required" maxlength="128" value="'+objLocation.location.address.addressLine1+'">';
+    sHTML += '<div class="form-group '+sRequired+'">';
+    sHTML += '<label for="location-address-addressLine1">Address 1</label>';
+    sHTML += '<input type="text" name="addressLine1" id="location-address-addressLine1" class="form-control required" maxlength="128" value="'+objLocation.location.address.addressLine1+'"'+sReadonly+'>';
     sHTML += '</div>';
     
     sHTML += '<div class="form-group">';
     sHTML += '<label for="location-address-addressLine2">Address 2</label>';
-    sHTML += '<input type="text" name="addressLine2" id="location-address-addressLine2" class="form-control" maxlength="128" value="'+objLocation.location.address.addressLine2+'">';
+    sHTML += '<input type="text" name="addressLine2" id="location-address-addressLine2" class="form-control" maxlength="128" value="'+objLocation.location.address.addressLine2+'"'+sReadonly+'>';
     sHTML += '</div>';
     
-    sHTML += '<div class="form-group required">';
+    sHTML += '<div class="form-group'+sRequired+'">';
     sHTML += '<label for="location-address-city">City</label>';
-    sHTML += '<input type="text" name="city" id="location-address-city" class="form-control" maxlength="128" value="'+objLocation.location.address.city+'">';
+    sHTML += '<input type="text" name="city" id="location-address-city" class="form-control" maxlength="128" value="'+objLocation.location.address.city+'"'+sReadonly+'>';
     sHTML += '</div>';
     
-    sHTML += '<div class="form-group required">';
+    sHTML += '<div class="form-group'+sRequired+'">';
     sHTML += '<label for="location-address-postalCode">Postal Code/ Zip</label>';
-    sHTML += '<input type="text" name="postalCode" id="location-address-postalCode" class="form-control" maxlength="16" value="'+objLocation.location.address.postalCode+'">';
+    sHTML += '<input type="text" name="postalCode" id="location-address-postalCode" class="form-control" maxlength="16" value="'+objLocation.location.address.postalCode+'"'+sReadonly+'>';
     sHTML += '</div>';
     
-    sHTML += '<div class="form-group required">';
+    sHTML += '<div class="form-group'+sRequired+'">';
     sHTML += '<label for="location-address-stateOrProvince">State/ Province</label>';
-    sHTML += '<input type="text" name="stateOrProvince" id="location-address-stateOrProvince" class="form-control" maxlength="128" value="'+objLocation.location.address.postalCode+'">';
+    sHTML += '<input type="text" name="stateOrProvince" id="location-address-stateOrProvince" class="form-control" maxlength="128" value="'+objLocation.location.address.postalCode+'"'+sReadonly+'>';
     sHTML += '</div>';
     
-    sHTML += '<div class="form-group required">';
+    sHTML += '<div class="form-group'+sRequired+'">';
     sHTML += '<label for="location-address-country">Country Code</label>';
-    sHTML += '<input type="text" name="country" id="location-address-country" class="form-control" maxlength="2" title="Two-letter ISO 3166-1 Alpha-2 country code"  value="'+objLocation.location.address.country+'" placeholder="2-letter ISO country code">';
+    sHTML += '<input type="text" name="country" id="location-address-country" class="form-control" maxlength="2" title="Two-letter ISO 3166-1 Alpha-2 country code" value="'+objLocation.location.address.country+'" placeholder="2-letter ISO country code"'+sReadonly+'>';
+    sHTML += '</div>';
+  
+    sHTML += '<div class="form-group">';
+    sHTML += '<label for="location-locationInstructions">Location Instructions (how to find the location)</label>';
+    sHTML += '<input type="text" name="locationInstructions" id="location-locationInstructions" class="form-control" maxlength="256" value="'+objLocation.locationInstructions+'">'; 
     sHTML += '</div>';
     
     sHTML += '<div class="form-group">';
@@ -268,7 +287,7 @@ define([
     sHTML += '</div>';
     
     sHTML += '<div class="form-group">';
-    sHTML += '<label for="location-locationWebUrl">URL</label>';
+    sHTML += '<label for="location-locationWebUrl">Store Website</label>';
     sHTML += '<input type="text" name="locationURL" id="location-locationWebUrl" class="form-control" maxlength="512" value="'+objLocation.locationWebUrl+'">'; 
     sHTML += '</div>';
     
@@ -283,7 +302,7 @@ define([
       
     /* Button for updating an existing location */
     } else {
-      sHTML += '<button type="button" id="update-location" class="btn btn-primary">Update Location</button>';
+      sHTML += '<button type="button" id="update-location" class="btn btn-primary" data-merchantlocationkey="'+objLocation.merchantLocationKey+'">Update Location</button>';
     }
     
     sHTML += '</form>';
@@ -321,14 +340,6 @@ define([
     }
     
     nsc(document).trigger('locationsRetrieved');
-    /* If the modal is active refresh it */
-    /* Continue here 
-     * 
-     * The add delete location
-     * Add update location
-     * Add prefilling new location with store data
-     * 
-     * */
   };
   
   objLocationsPanel.getLocations = function() {
@@ -354,37 +365,41 @@ define([
           postalCode      : nsc('#location-address-postalCode').val(),
           country         : nsc('#location-address-country').val()
         }
-    },
-    locationAdditionalInformation : nsc('#location-locationAdditionalInformation').val(),
-    name : nsc('#location-name').val(),
-    merchantLocationStatus : (nsc('#location-merchantLocationStatus:checked') ? 'ENABLED' : 'DISABLED'),
-    locationTypes : [
-      "STORE"
-    ]
+      },
+      
+      name                          : nsc('#location-name').val(),
+      phone                         : nsc('#location-phone').val(),
+      locationWebUrl                : nsc('#location-locationWebUrl').val(),
+      locationInstructions          : nsc('#location-locationInstructions').val(),
+      locationAdditionalInformation : nsc('#location-locationAdditionalInformation').val(),
+      
+      merchantLocationStatus : (nsc('#location-merchantLocationStatus:checked') ? 'ENABLED' : 'DISABLED'),
+      locationTypes : [
+        "STORE"
+      ]
     };
 
     objLocationsPanel.setUpdating('Adding '+nsc('#location-name').val()+' as a new location');
     objApiInventory.createLocation(sLocationKey, objLocationData, objLocationsPanel.getLocations);
   };
   
-  objLocationsPanel.objectifyForm = function(formArray) {//serialize data function
-    var returnArray = {};
-    for (var i = 0; i < formArray.length; i++){
-      returnArray[formArray[i]['name']] = formArray[i]['value'];
-    }
-    return returnArray;
-  }
-  
   objLocationsPanel.deleteLocation = function(sLocationKey) {
     objLocationsPanel.setUpdating('Deleting location '+objLocationsPanel.objSettings.objLocations[sLocationKey].name);
     objApiInventory.deleteLocation(sLocationKey, objLocationsPanel.getLocations);
   };
   
-  objLocationsPanel.updateLocation = function() {
-    console.log('updateLocation called');
+  objLocationsPanel.updateLocation = function(sLocationKey) {
+    var objLocationData = {
+      name                          : nsc('#location-name').val(),
+      phone                         : nsc('#location-phone').val(),
+      locationWebUrl                : nsc('#location-locationWebUrl').val(),
+      locationInstructions          : nsc('#location-locationInstructions').val(),
+      locationAdditionalInformation : nsc('#location-locationAdditionalInformation').val()
+    };
+
+    objLocationsPanel.setUpdating('Updating '+nsc('#location-name').val());
+    objApiInventory.updateLocation(sLocationKey, objLocationData, objLocationsPanel.getLocations);
   };
-  
-  objLocationsPanel.updateLocations = function() {};
   
   objLocationsPanel.enableLocation = function(sLocationKey) {
     objLocationsPanel.setUpdating('Setting '+objLocationsPanel.objSettings.objLocations[sLocationKey].name+' status to enabled');
@@ -440,14 +455,14 @@ define([
         longitude : 51.900956
       }
     },
-    locationAdditionalInformation : 'This is a test location',
-    locationInstructions          : 'Please do not buy from this test store',
-    locationTypes                 : ['STORE'],
+    name                          : 'Test Location Name',
+    phone                         : '0123456789',
     locationWebUrl                : 'jamesmcging.demostore.nitrosell.com',
+    locationInstructions          : 'Instructions for find this test location',
+    locationAdditionalInformation : 'Additional information about this store',
+    locationTypes                 : ['STORE'],
     merchantLocationKey           : '',
     merchantLocationStatus        : 'ENABLED',
-    name                          : 'Test store',
-    phone                         : '0123456789'
   };
 
   return objLocationsPanel;
