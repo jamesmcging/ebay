@@ -35,5 +35,9 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
     this.makeCall('post', objInventoryApi.sApiName, 'location', sLocationKey+'/disable', null, sCallbackFunction);
   };
 
+  objInventoryApi.deleteLocation = function(sLocationKey, sCallbackFunction) {  
+    this.makeCall('delete', objInventoryApi.sApiName, 'location', sLocationKey, null, sCallbackFunction);
+  };
+  
   return objInventoryApi;
 });

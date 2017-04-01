@@ -62,8 +62,14 @@ define([
       objLocationsPanel.setListeners();
     });
     
-    nsc('.location-name').off().on('click', function() {
-      var sLocationKey = nsc(this).parent().data('locationkey');
+    nsc('.location-item').off().on('click', function(event) {
+      /* We don't want to open the form when clicking the buttons in the 
+       * location list */
+      if (event.target !== this && nsc(event.target).attr('class') !== 'location-name') {
+        return;
+      }
+  
+      var sLocationKey = nsc(this).data('locationkey');
       
       if (sLocationKey === 'newlocation') {
         nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocationsPanel.objLocation));
@@ -75,6 +81,7 @@ define([
         }
       }
       
+      /* This listens for the button at the bottom of the new location form */
       nsc('#create-location').off().on('click', function() {
         if (nsc('#location-merchantLocationKey').val()) {
           objLocationsPanel.createLocation();
@@ -83,16 +90,25 @@ define([
         }
       });
       
+      /* This listens for the button at the bottom of the update location form */
       nsc('#update-location').off().on('click', function() {
         objLocationsPanel.updateLocation();
       });
     });
-
-    nsc(document).on("credentialsPanelUpdated", function(event, nCredentialsPanelStatus, bCredentialsPanelActive) {
+    
+    nsc(document).on('credentialsPanelUpdated', function(event, nCredentialsPanelStatus, bCredentialsPanelActive) {
       if (nCredentialsPanelStatus === 4) {
         objLocationsPanel.initialize();
       } else {
         objLocationsPanel.setInactive('Location panel needs the credentials panel to be active');
+      }
+    });
+    
+    nsc(document).on('locationsRetrieved', function() {
+      if ((nsc('#modal-anchor').data('bs.modal') || {}).isShown) {
+        objLocationsPanel.refreshModal();
+      } else {
+        console.log('locations retrieved but modal clsoed');
       }
     });
     
@@ -108,12 +124,15 @@ define([
       objLocationsPanel.enableLocation(sLocationKey);
     });    
     
+    nsc('.deletelocationbutton').on('click', function() {
+      var sLocationKey = nsc(event.target).data('merchantlocationkey');
+      objLocationsPanel.deleteLocation(sLocationKey);
+    }); 
   };
   
   objLocationsPanel.getModalBodyMarkup = function() {
     var sHTML = '';
     if (objCredentialsPanel.getIsPanelActive()) {
-      sHTML += '<p>Items sold on eBay are sold from a location. Use this panel to add and or edit locations from which you sell your goods.</p>';
       sHTML += objLocationsPanel.getLocationListMarkup();
       sHTML += '<div id="location-form"></div>';
     } else {
@@ -122,25 +141,39 @@ define([
     return sHTML;
   };
   
+  objLocationsPanel.refreshModal = function() {
+    var sNewModalContent = '<div class="modal-body">';  
+    sNewModalContent += objLocationsPanel.getModalBodyMarkup();
+    sNewModalContent += '</div>';
+    nsc('.modal-body').replaceWith(sNewModalContent);
+    objLocationsPanel.setListeners();
+  };
+  
   objLocationsPanel.getLocationListMarkup = function() {
     var sHTML = '';
-    sHTML += '<div id="location-list">';
+    sHTML += '<div id="location-list" class="panel panel-default">';
+    sHTML += '  <div class="panel-heading">List of Locations</div>';
+    sHTML += '  <div class="panel-body">';
+    sHTML += '    <p>Items sold on eBay are sold from a location. Use this panel to add and or edit locations from which you sell your goods.</p>';
+    sHTML += '    <button class="btn btn-primary location-item" data-locationkey="newlocation">Add New Location</button>';
+    sHTML += '  </div>';
+    sHTML += '  <ul class="list-group">';
+
+    /* List all existing locations */
     for (var sLocationKey in objLocationsPanel.objSettings.objLocations) {
       var objLocation = objLocationsPanel.objSettings.objLocations[sLocationKey];
-      sHTML += '<div class="location-item" data-locationkey="'+sLocationKey+'">';
-      sHTML += '<span class="location-name">' + objLocation.name + '</span>';
-      sHTML += '<span class="pull-right">';
-      sHTML += objLocationsPanel.getLocationEnabledButtonMarkup(objLocation);
-      sHTML += '</span>';
-      sHTML += '</div>';
+      sHTML += '<li class="location-item list-group-item" data-locationkey="'+sLocationKey+'">';
+      sHTML += '  <span class="location-name">' + objLocation.name + '</span>';
+      sHTML += '  <span class="btn-group pull-right">';
+      sHTML += objLocationsPanel.getLocationEnabledButtonMarkup(objLocation);      
+      sHTML += '    <button class="btn btn-danger btn-xs deletelocationbutton" data-merchantlocationkey="'+sLocationKey+'">Delete</button>';
+      sHTML += '  </span>';
+      sHTML += '</li>';
     }
     
-    /* Make it possible to add a new location */
-    sHTML += '<div class="location-item" data-locationkey="newlocation">';
-    sHTML += '<span class="location-name">New Location</span>';
-    sHTML += '</div>';
-    
+    sHTML += '  </ul>';
     sHTML += '</div><!-- #location-list -->';
+    
     return sHTML;
   };
   
@@ -148,9 +181,9 @@ define([
     var sHTML = '';
     
     if (objLocation.merchantLocationStatus === 'ENABLED') {
-      sHTML += '<button class="btn btn-xs btn-danger disablelocationbutton" data-merchantLocationKey="'+objLocation.merchantLocationKey+'">Disable</button>';
+      sHTML += '<button class="btn btn-xs btn-success disablelocationbutton" data-merchantLocationKey="'+objLocation.merchantLocationKey+'">Enabled</button>';
     } else {
-      sHTML += '<button class="btn btn-xs btn-success enablelocationbutton" data-merchantLocationKey="'+objLocation.merchantLocationKey+'">Enable</button>';
+      sHTML += '<button class="btn btn-xs btn-danger enablelocationbutton" data-merchantLocationKey="'+objLocation.merchantLocationKey+'">Disabled</button>';
     }
     
     return sHTML;
@@ -162,8 +195,19 @@ define([
    * @returns {String}
    */
   objLocationsPanel.getLocationFormMarkup = function(objLocation) {
-    var sHTML = '<hr>';
-    sHTML += '<form name="location-form" id="location-form">';
+    
+    var bNewLocation = objLocation.merchantLocationKey.length === 0 ? true : false;
+    
+    var sHTML = ''
+    sHTML += '<div  id="location-form" class="panel panel-default">';
+    sHTML += '  <div class="panel-heading">';
+    sHTML += '    <span>'+objLocation.name+'</span>';
+    if (!bNewLocation) {
+      sHTML += '<span class="pull-right" title="merchant location key"><em>'+objLocation.merchantLocationKey+'</em></span>';
+    }
+    sHTML += '  </div>';
+    sHTML += '  <div class="panel-body">';
+    sHTML += '    <form name="location-form">';
   
     sHTML += '<div class="form-group">';
     sHTML += '<label for="location-name">Location Name</label>';
@@ -172,19 +216,21 @@ define([
 
     /* If we are creating a new location we need to be able to set this, 
      * otherwise, if we are viewing/updating a location, the key is immutable */
-    var sReadOnly = (objLocation.merchantLocationKey.length === 0) ? '' : 'readonly';
-    sHTML += '<div class="form-group">';
-    sHTML += '<label for="location-merchantLocationKey">Location Key</label>';
-    sHTML += '<input type="text" name="merchantLocationKey" id="location-merchantLocationKey" class="form-control" maxlength="36" value="'+objLocation.merchantLocationKey+'" '+sReadOnly+'>';
-    sHTML += '</div>';
+    if (bNewLocation) {
+      sHTML += '<div class="form-group">';
+      sHTML += '<label for="location-merchantLocationKey">Location Key</label>';
+      sHTML += '<input type="text" name="merchantLocationKey" id="location-merchantLocationKey" class="form-control" maxlength="36" value="'+objLocation.merchantLocationKey+'">';
+      sHTML += '</div>';
+    }
 
     // ENUM [ ENABLED | DISABLED ]
-    var sChecked = (objLocation.merchantLocationStatus === 'ENABLED') ? ' checked="checked"' : '';
-    sHTML += '<div class="checkbox">';
-    sHTML += '<label>';
-    sHTML += '<input type="checkbox" name="merchantLocationStatus" id="location-merchantLocationStatus"'+sChecked+'>Status';
-    sHTML += '</label>';
-    sHTML += '</div>';
+    // commented this out for the moment as we deal with it in the location list
+//    var sChecked = (objLocation.merchantLocationStatus === 'ENABLED') ? ' checked="checked"' : '';
+//    sHTML += '<div class="checkbox">';
+//    sHTML += '<label>';
+//    sHTML += '<input type="checkbox" name="merchantLocationStatus" id="location-merchantLocationStatus"'+sChecked+'>Status';
+//    sHTML += '</label>';
+//    sHTML += '</div>';
     
     sHTML += '<div class="form-group required">';
     sHTML += '<label for="location-address-addressLine1" class="required">Address 1</label>';
@@ -222,11 +268,6 @@ define([
     sHTML += '</div>';
     
     sHTML += '<div class="form-group">';
-    sHTML += '<label for="location-locationId">eBay ID</label>';
-    sHTML += '<input type="text" name="locationId" id="location-locationId" class="form-control" value="'+objLocation.locationId+'" readonly>'; 
-    sHTML += '</div>';
-    
-    sHTML += '<div class="form-group">';
     sHTML += '<label for="location-locationWebUrl">URL</label>';
     sHTML += '<input type="text" name="locationURL" id="location-locationWebUrl" class="form-control" maxlength="512" value="'+objLocation.locationWebUrl+'">'; 
     sHTML += '</div>';
@@ -238,14 +279,16 @@ define([
     
     /* Button for creating a new location */
     if (objLocation.merchantLocationKey.length === 0) {
-      sHTML += '<button type="button" id="create-location" class="btn btn-default">Create New Location</button>';
+      sHTML += '<button type="button" id="create-location" class="btn btn-primary">Create New Location</button>';
       
     /* Button for updating an existing location */
     } else {
-      sHTML += '<button type="button" id="update-location" class="btn btn-default">Update Location</button>';
+      sHTML += '<button type="button" id="update-location" class="btn btn-primary">Update Location</button>';
     }
     
     sHTML += '</form>';
+    sHTML += '</div><!-- .panelbody -->';
+    sHTML += '</div><!-- .panel -->';
     return sHTML;
   };
   
@@ -258,6 +301,8 @@ define([
    * @returns {undefined}
    */
   objLocationsPanel.setLocations = function(objData) {
+    objLocationsPanel.objSettings.objLocations = {};
+    
     if (objData.bOutcome && objData.sResponseMessage.locations.length) {
       for (var i = 0; i < objData.sResponseMessage.locations.length; i++) {
         var objLocation = objData.sResponseMessage.locations[i];
@@ -268,13 +313,14 @@ define([
         var sLocationName = objLocationsPanel.objSettings.objLocations[objLocation.merchantLocationKey].name;
         objLocationsPanel.setActive(sLocationName + ' is set up. Click to update or add a new location');
       } else {
-        objLocationsPanel.setActive('You have '+nNumberOfLocations+' location(s) set up. Click to update or add a new location');
+        objLocationsPanel.setActive('You have '+nNumberOfLocations+' locations set up. Click to update or add a new location');
       }
       
     } else {
       objLocationsPanel.setInactive('Click here to set up a selling location.');
     }
     
+    nsc(document).trigger('locationsRetrieved');
     /* If the modal is active refresh it */
     /* Continue here 
      * 
@@ -297,17 +343,16 @@ define([
   };
   
   objLocationsPanel.createLocation = function() {
-    console.log('createLocation called');
     var sLocationKey  = nsc('#location-merchantLocationKey').val();
     var objLocationData = {
       location : {
         address : {
-            addressLine1    : nsc('#location-address-addressLine1').val(),
-            addressLine2    : nsc('#location-address-addressLine2').val(),
-            city            : nsc('#location-address-city').val(),
-            stateOrProvince : nsc('#location-address-stateOrProvince').val(),
-            postalCode      : nsc('#location-address-postalCode').val(),
-            country         : nsc('#location-address-country').val()
+          addressLine1    : nsc('#location-address-addressLine1').val(),
+          addressLine2    : nsc('#location-address-addressLine2').val(),
+          city            : nsc('#location-address-city').val(),
+          stateOrProvince : nsc('#location-address-stateOrProvince').val(),
+          postalCode      : nsc('#location-address-postalCode').val(),
+          country         : nsc('#location-address-country').val()
         }
     },
     locationAdditionalInformation : nsc('#location-locationAdditionalInformation').val(),
@@ -317,10 +362,9 @@ define([
       "STORE"
     ]
     };
-    
-    console.log(objLocationData);
-    
-    objApiInventory.createLocation(sLocationKey, objLocationData, objLocationsPanel.setLocations);
+
+    objLocationsPanel.setUpdating('Adding '+nsc('#location-name').val()+' as a new location');
+    objApiInventory.createLocation(sLocationKey, objLocationData, objLocationsPanel.getLocations);
   };
   
   objLocationsPanel.objectifyForm = function(formArray) {//serialize data function
@@ -331,7 +375,10 @@ define([
     return returnArray;
   }
   
-  objLocationsPanel.deleteLocations = function() {};
+  objLocationsPanel.deleteLocation = function(sLocationKey) {
+    objLocationsPanel.setUpdating('Deleting location '+objLocationsPanel.objSettings.objLocations[sLocationKey].name);
+    objApiInventory.deleteLocation(sLocationKey, objLocationsPanel.getLocations);
+  };
   
   objLocationsPanel.updateLocation = function() {
     console.log('updateLocation called');
@@ -340,10 +387,12 @@ define([
   objLocationsPanel.updateLocations = function() {};
   
   objLocationsPanel.enableLocation = function(sLocationKey) {
+    objLocationsPanel.setUpdating('Setting '+objLocationsPanel.objSettings.objLocations[sLocationKey].name+' status to enabled');
     objApiInventory.enableLocation(sLocationKey, objLocationsPanel.setLocationEnabled);
   };
   
   objLocationsPanel.disableLocation = function(sLocationKey) {
+    objLocationsPanel.setUpdating('Setting '+objLocationsPanel.objSettings.objLocations[sLocationKey].name+' status to disabled');
     objApiInventory.disableLocation(sLocationKey, objLocationsPanel.setLocationDisabled);    
   };
     
@@ -353,13 +402,11 @@ define([
       var arrUrlElements = objResponse.sTargetURL.split("/");
       var sLocationKey = arrUrlElements[7];
       objLocationsPanel.objSettings.objLocations[sLocationKey].merchantLocationStatus = 'DISABLED';
-    
+      
+      objLocationsPanel.setActive('Location disabled');
+      
       // Redraw the modal window body
-      var sNewModalContent =  '<div class="modal-body">';
-      sNewModalContent += objLocationsPanel.getModalBodyMarkup();
-      sNewModalContent += '</div>';
-      nsc('.modal-body').replaceWith(sNewModalContent);
-      objLocationsPanel.setListeners();
+      objLocationsPanel.refreshModal();
     }
   };
   
@@ -370,12 +417,10 @@ define([
       var sLocationKey = arrUrlElements[7];
       objLocationsPanel.objSettings.objLocations[sLocationKey].merchantLocationStatus = 'ENABLED';
       
+      objLocationsPanel.setActive('Location enabled');
+      
       // Redraw the modal window body
-      var sNewModalContent =  '<div class="modal-body">';
-      sNewModalContent += objLocationsPanel.getModalBodyMarkup();
-      sNewModalContent += '</div>';
-      nsc('.modal-body').replaceWith(sNewModalContent);
-      objLocationsPanel.setListeners();
+      objLocationsPanel.refreshModal();
     }
   };
   
@@ -393,8 +438,7 @@ define([
       geoCoordinates : {
         latitude  : -8.469289,
         longitude : 51.900956
-      },
-      locationId: ''
+      }
     },
     locationAdditionalInformation : 'This is a test location',
     locationInstructions          : 'Please do not buy from this test store',

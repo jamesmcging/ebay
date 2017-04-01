@@ -208,7 +208,7 @@ class EbayAuthorization implements EbayStatus {
     } else {
       // we check if it has or is about to expire
       if (!empty($this->_arrUserToken['sRefreshToken']) 
-          && (int)$this->_arrUserToken['nTokenExpiresAt'] + self::SAFE_WINDOW < time()) {
+          && (int)$this->_arrUserToken['nTokenExpiresAt'] < (time() - self::SAFE_WINDOW)) {
         $this->renewAccessToken();
         
       // otherwise we deem the user access token to be valid
