@@ -53,6 +53,10 @@ define(['jquery'], function(nsc) {
     nsc('#modal-anchor').modal('show');
   };
   
+  objPanel.hideModal = function() {
+    nsc('#modal-anchor').modal('hide');
+  };
+  
   objPanel.getModalBodyMarkup = function() {
     return 'modal content needs overriden/ defined in the panel getModalBodyMarkup function';
   };

@@ -47,34 +47,46 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     return sHTML;
   };
   
-  objStatusPanel.setActive = function() {
+  objStatusPanel.setActive = function(sMessage) {
     nsc('#'+this.sCode+'-panel').removeClass();
     nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-active');
     
     nsc('#'+this.sCode+'-status-icon').removeClass();
     nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-check');
+    
+    if (sMessage) {
+      nsc('#locationspanel-status-text').text(sMessage);
+    }  
   };
   
   objStatusPanel.getIsPanelActive = function() {
     return objStatusPanel.objSettings.bActive;
   };
   
-  objStatusPanel.setInactive = function() {
+  objStatusPanel.setInactive = function(sMessage) {
     nsc('#'+this.sCode+'-panel').removeClass();
     nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-inactive');
     
     nsc('#'+this.sCode+'-status-icon').removeClass();
     nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-times');
+    
+    if (sMessage) {
+      nsc('#locationspanel-status-text').text(sMessage);
+    }
   };
   
-  objStatusPanel.setUpdating = function() {
+  objStatusPanel.setUpdating = function(sMessage) {    
     nsc('#'+this.sCode+'-panel').removeClass();
     nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-updating');
     
     nsc('#'+this.sCode+'-status-icon').removeClass();
     nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-refresh fa-spin fa-fw');
     
-    nsc('#'+this.sCode+'-status-text').html('Updating...');
+    if (sMessage) {
+      nsc('#'+this.sCode+'-status-text').text(sMessage);
+    } else {
+      nsc('#'+this.sCode+'-status-text').text('Updating...');
+    }
   };
   
   objStatusPanel.getSettings = function() {

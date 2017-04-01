@@ -12,7 +12,6 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
    * @returns {inventory_L1.objInventoryApi@call;makeCall}
    */
   objInventoryApi.getLocations = function(sCallbackFunction) {
-    console.log('objInventoryApi.getLocations called');
     var objParams = {limit:100,offset:0};
     this.makeCall('get', objInventoryApi.sApiName, 'location', null, objParams, sCallbackFunction);
   };
@@ -26,6 +25,14 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
    */
   objInventoryApi.createLocation = function(sLocationKey, sSerializedData, sCallbackFunction) {
     this.makeCall('post', objInventoryApi.sApiName, 'location', sLocationKey, sSerializedData, sCallbackFunction);
+  };
+  
+  objInventoryApi.enableLocation = function(sLocationKey, sCallbackFunction) {
+    this.makeCall('post', objInventoryApi.sApiName, 'location', sLocationKey+'/enable', null, sCallbackFunction);
+  };
+
+  objInventoryApi.disableLocation = function(sLocationKey, sCallbackFunction) {
+    this.makeCall('post', objInventoryApi.sApiName, 'location', sLocationKey+'/disable', null, sCallbackFunction);
   };
 
   return objInventoryApi;

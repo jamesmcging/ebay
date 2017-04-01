@@ -28,8 +28,6 @@ define([
     if (objCredentialsPanel.getIsPanelActive()) {
       /* Ask eBay for any locations associated with this user */
       objLocationsPanel.getLocations(objLocationsPanel.setLocations);
-    } else {
-      console.log('credentials panel inactive');
     }
   };
   
@@ -64,8 +62,8 @@ define([
       objLocationsPanel.setListeners();
     });
     
-    nsc('.location-item').on('click', function() {
-      var sLocationKey = nsc(this).data('locationkey');
+    nsc('.location-name').off().on('click', function() {
+      var sLocationKey = nsc(this).parent().data('locationkey');
       
       if (sLocationKey === 'newlocation') {
         nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocationsPanel.objLocation));
@@ -73,7 +71,7 @@ define([
         if (typeof (objLocationsPanel.objSettings.objLocations[sLocationKey]) !== 'undefined') {
           nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocationsPanel.objSettings.objLocations[sLocationKey]));
         } else {
-          nsc('#location-form').replaceWith('<div id="location-form">Unable to find location ('+sLocationKey+')</div>');
+          nsc('#location-form').text('Unable to find location ('+sLocationKey+')');
         }
       }
       
@@ -92,12 +90,24 @@ define([
 
     nsc(document).on("credentialsPanelUpdated", function(event, nCredentialsPanelStatus, bCredentialsPanelActive) {
       if (nCredentialsPanelStatus === 4) {
-        objLocationsPanel.setUpdating();
         objLocationsPanel.initialize();
       } else {
-        objLocationsPanel.setInactive();
+        objLocationsPanel.setInactive('Location panel needs the credentials panel to be active');
       }
     });
+    
+    nsc('.disablelocationbutton').on('click', function() {
+      var sLocationKey = nsc(event.target).data('merchantlocationkey');
+      console.log('disable '+sLocationKey+' called');
+      objLocationsPanel.disableLocation(sLocationKey);
+    });
+    
+    nsc('.enablelocationbutton').on('click', function() {
+      var sLocationKey = nsc(event.target).data('merchantlocationkey');
+      console.log('enable '+sLocationKey+' called');
+      objLocationsPanel.enableLocation(sLocationKey);
+    });    
+    
   };
   
   objLocationsPanel.getModalBodyMarkup = function() {
@@ -115,10 +125,13 @@ define([
   objLocationsPanel.getLocationListMarkup = function() {
     var sHTML = '';
     sHTML += '<div id="location-list">';
-    for (var i = 0; i < objLocationsPanel.objSettings.objLocations.length; i++) {
-      var objLocation = objLocationsPanel.objSettings.objLocations[i];
-      sHTML += '<div class="location-item" data-locationkey="'+objLocation.merchantLocationKey+'">';
+    for (var sLocationKey in objLocationsPanel.objSettings.objLocations) {
+      var objLocation = objLocationsPanel.objSettings.objLocations[sLocationKey];
+      sHTML += '<div class="location-item" data-locationkey="'+sLocationKey+'">';
       sHTML += '<span class="location-name">' + objLocation.name + '</span>';
+      sHTML += '<span class="pull-right">';
+      sHTML += objLocationsPanel.getLocationEnabledButtonMarkup(objLocation);
+      sHTML += '</span>';
       sHTML += '</div>';
     }
     
@@ -131,13 +144,24 @@ define([
     return sHTML;
   };
   
+  objLocationsPanel.getLocationEnabledButtonMarkup = function(objLocation) {
+    var sHTML = '';
+    
+    if (objLocation.merchantLocationStatus === 'ENABLED') {
+      sHTML += '<button class="btn btn-xs btn-danger disablelocationbutton" data-merchantLocationKey="'+objLocation.merchantLocationKey+'">Disable</button>';
+    } else {
+      sHTML += '<button class="btn btn-xs btn-success enablelocationbutton" data-merchantLocationKey="'+objLocation.merchantLocationKey+'">Enable</button>';
+    }
+    
+    return sHTML;
+  };
+  
   /**
    * 
-   * @param {string} sLocationKey
+   * @param {obj} objLocation
    * @returns {String}
    */
   objLocationsPanel.getLocationFormMarkup = function(objLocation) {
-    console.log(objLocation);
     var sHTML = '<hr>';
     sHTML += '<form name="location-form" id="location-form">';
   
@@ -234,24 +258,36 @@ define([
    * @returns {undefined}
    */
   objLocationsPanel.setLocations = function(objData) {
-    if (objData.bOutcome) {
-      objLocationsPanel.objSettings.objLocations = objData.sResponseMessage.locations || {};
+    if (objData.bOutcome && objData.sResponseMessage.locations.length) {
+      for (var i = 0; i < objData.sResponseMessage.locations.length; i++) {
+        var objLocation = objData.sResponseMessage.locations[i];
+        objLocationsPanel.objSettings.objLocations[objLocation.merchantLocationKey] = objLocation;
+      }
+      var nNumberOfLocations = Object.keys(objLocationsPanel.objSettings.objLocations).length;
+      if (nNumberOfLocations === 1) {
+        var sLocationName = objLocationsPanel.objSettings.objLocations[objLocation.merchantLocationKey].name;
+        objLocationsPanel.setActive(sLocationName + ' is set up. Click to update or add a new location');
+      } else {
+        objLocationsPanel.setActive('You have '+nNumberOfLocations+' location(s) set up. Click to update or add a new location');
+      }
       
     } else {
-      var sMessage = 'getLocations failed to return any locations. Response message : ' + objData.sResponseMessage;
-      console.log(sMessage);
+      objLocationsPanel.setInactive('Click here to set up a selling location.');
     }
     
-    console.log(objLocationsPanel.objSettings);
-    
-    if (objLocationsPanel.objSettings.objLocations.length) {
-      objLocationsPanel.setActive();
-    } else {
-      objLocationsPanel.setInactive();
-    }
+    /* If the modal is active refresh it */
+    /* Continue here 
+     * 
+     * The add delete location
+     * Add update location
+     * Add prefilling new location with store data
+     * 
+     * */
   };
   
   objLocationsPanel.getLocations = function() {
+    objLocationsPanel.setUpdating('Fetching locations');
+
     /* Ask eBay for any locations associated with this user */
     objApiInventory.getLocations(objLocationsPanel.setLocations);
   };
@@ -303,9 +339,45 @@ define([
   
   objLocationsPanel.updateLocations = function() {};
   
-  objLocationsPanel.enableLocation = function() {};
+  objLocationsPanel.enableLocation = function(sLocationKey) {
+    objApiInventory.enableLocation(sLocationKey, objLocationsPanel.setLocationEnabled);
+  };
   
-  objLocationsPanel.disableLocation = function() {};
+  objLocationsPanel.disableLocation = function(sLocationKey) {
+    objApiInventory.disableLocation(sLocationKey, objLocationsPanel.setLocationDisabled);    
+  };
+    
+  objLocationsPanel.setLocationDisabled = function(objResponse) {
+    if (objResponse.bOutcome && objResponse.nResponseCode === 200) {
+      // Extract the location from the target URL
+      var arrUrlElements = objResponse.sTargetURL.split("/");
+      var sLocationKey = arrUrlElements[7];
+      objLocationsPanel.objSettings.objLocations[sLocationKey].merchantLocationStatus = 'DISABLED';
+    
+      // Redraw the modal window body
+      var sNewModalContent =  '<div class="modal-body">';
+      sNewModalContent += objLocationsPanel.getModalBodyMarkup();
+      sNewModalContent += '</div>';
+      nsc('.modal-body').replaceWith(sNewModalContent);
+      objLocationsPanel.setListeners();
+    }
+  };
+  
+  objLocationsPanel.setLocationEnabled = function(objResponse) {
+    if (objResponse.bOutcome && objResponse.nResponseCode === 200) {
+      // Extract the location from the target URL
+      var arrUrlElements = objResponse.sTargetURL.split("/");
+      var sLocationKey = arrUrlElements[7];
+      objLocationsPanel.objSettings.objLocations[sLocationKey].merchantLocationStatus = 'ENABLED';
+      
+      // Redraw the modal window body
+      var sNewModalContent =  '<div class="modal-body">';
+      sNewModalContent += objLocationsPanel.getModalBodyMarkup();
+      sNewModalContent += '</div>';
+      nsc('.modal-body').replaceWith(sNewModalContent);
+      objLocationsPanel.setListeners();
+    }
+  };
   
   objLocationsPanel.objLocation = {
     location : {

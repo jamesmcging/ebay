@@ -147,13 +147,9 @@ class EbayApiGateway implements EbayStatus {
       $this->_arrResponse['sResponseMessage'] = 'CURL not ready. Missing elements: '.print_r($this->_arrMissingElements, 1);
     }
     
-    if ($this->_bDebug) {
-      $this->_arrResponse['dev'] = array(
-        'url'    => $sCurlURL,
-        'method' => $this->_sMethod,
-        'params' => $this->_arrParams,
-      );
-    }
+    $this->_arrResponse['sMethod']    = $this->_sMethod;
+    $this->_arrResponse['arrParams']  = $this->_arrParams;
+    $this->_arrResponse['sTargetURL'] = $sCurlURL;
     
     return $this->_arrResponse;
   }
