@@ -80,7 +80,7 @@ class EbayAuthorization implements EbayStatus {
         $this->_arrUserToken = array_replace($this->_arrUserToken, $arrDbTokenData);
 
       } else {
-        die('bad jeebies in  '.__METHOD__.' at line '.__LINE__.' the user token is corrupt.');
+        $this->_arrUserToken = '';
       }
     }
     
@@ -201,7 +201,7 @@ class EbayAuthorization implements EbayStatus {
    */
   private function setStatus() {
     // If we have no token we are in virgin territory
-    if (strlen($this->_arrUserToken['sAccessToken']) === 0) {
+    if (empty($this->_arrUserToken) || strlen($this->_arrUserToken['sAccessToken']) === 0) {
       $this->_bEbayStatus = self::UNINITIALIZED;
 
     // If we have a token...

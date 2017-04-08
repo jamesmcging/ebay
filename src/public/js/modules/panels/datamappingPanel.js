@@ -207,7 +207,7 @@ define([
     sHTML += '<h3 id="'+this.sCode+'-status-title">'+this.sName+'</h3>';
     sHTML += '<p id="'+this.sCode+'-status-text">';
     if (objDataMappingPanel.objSettings.bActive) {
-      sHTML += 'Mappings set. You can push products to Ebay.';
+      sHTML += 'Mappings set.';
     } else {
       sHTML += 'The following fields require mappings: '+arrMissingMappings.join(', ');
     } 
@@ -444,7 +444,12 @@ define([
     });
 
     jqxhr.done(function(responsedata) {
-      objDataMappingPanel.objSettings.objDatamappings = responsedata['saved_data_mappings'];
+      /* The first time this is used there are no mappings on the server */
+      if (responsedata['saved_data_mappings'] === null) {
+        objDataMappingPanel.objSettings.objDatamappings = objDataMappingPanel.objSettings.objDefaultMappings;
+      } else {
+        objDataMappingPanel.objSettings.objDatamappings = responsedata['saved_data_mappings'];
+      }    
     });
     
     jqxhr.fail(function(xhr, status, errorThrown) {
