@@ -71,7 +71,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   objSummaryPanel.refresh = function() {
     /* Ask the store for figures */    
     var jqxhr = nsc.ajax({
-      url      : '/store',
+      url      : '/store/storedata',
       data     : {},
       dataType : "json",
       type     : "get"

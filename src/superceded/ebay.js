@@ -90,6 +90,7 @@ var Panel = function() {
    * @returns {Boolean}
    */
   objPanel.setActive = function() {
+    console.log('objPanel.setActive('+this.sCode+')');
     /* This is to be over ridden by panel specific code. */
     nsc('#'+objPanel.sCode).show();
     return true;

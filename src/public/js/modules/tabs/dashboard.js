@@ -3,8 +3,10 @@ define(['jquery',
   'modules/panels/summaryPanel',
   'modules/panels/credentialsPanel', 
   'modules/panels/policiesPanel',
-  'modules/panels/locationsPanel'],
-function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, objLocationsPanel) {
+  'modules/panels/locationsPanel',
+  'modules/panels/datamappingPanel'
+],
+function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, objLocationsPanel, objDatamappingPanel) {
    
   var objDashboard = {};
 
@@ -19,12 +21,14 @@ function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, ob
     summarypanel     : objSummaryPanel,
     credentialspanel : objCredentialsPanel,
     //policiespanel    : objPoliciesPanel,
-    locationspanel   : objLocationsPanel
+    locationspanel   : objLocationsPanel,
+    datamappingpanel : objDatamappingPanel
   };
   objDashboard.objStatusPanels = {
     credentialspanel : objCredentialsPanel,
     //policiespanel    : objPoliciesPanel,
-    locationspanel   : objLocationsPanel
+    locationspanel   : objLocationsPanel,
+    datamappingpanel : objDatamappingPanel
   };  
   
   objDashboard.initialize = function() {

@@ -322,7 +322,7 @@ define([
   objLocationsPanel.setLocations = function(objData) {
     objLocationsPanel.objSettings.objLocations = {};
     
-    if (objData.bOutcome && objData.sResponseMessage.locations.length) {
+    if (objData.bOutcome && objData.sResponseMessage && objData.sResponseMessage.locations && objData.sResponseMessage.locations.length) {
       for (var i = 0; i < objData.sResponseMessage.locations.length; i++) {
         var objLocation = objData.sResponseMessage.locations[i];
         objLocationsPanel.objSettings.objLocations[objLocation.merchantLocationKey] = objLocation;
@@ -343,10 +343,15 @@ define([
   };
   
   objLocationsPanel.getLocations = function() {
-    objLocationsPanel.setUpdating('Fetching locations');
+    
+    console.log(objCredentialsPanel.getIsPanelActive());
+    
+    if (objCredentialsPanel.getIsPanelActive()) {
+      objLocationsPanel.setUpdating('Fetching locations');
 
-    /* Ask eBay for any locations associated with this user */
-    objApiInventory.getLocations(objLocationsPanel.setLocations);
+      /* Ask eBay for any locations associated with this user */
+      objApiInventory.getLocations(objLocationsPanel.setLocations);
+    }
   };
   
   objLocationsPanel.getLocation = function() {

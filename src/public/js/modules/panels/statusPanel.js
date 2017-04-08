@@ -4,8 +4,8 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
 
   objStatusPanel.__proto__ = objPanel;
   
-  objStatusPanel.sName = 'Credentials';
-  objStatusPanel.sCode = 'credentialspanel';
+  objStatusPanel.sName = 'Generic Status Panel Name';
+  objStatusPanel.sCode = 'genericstatuspanel';
   objStatusPanel.objSettings.bActive = false;
   
   objStatusPanel.objChildPanels = {};
@@ -31,12 +31,11 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   objStatusPanel.render = function() {
     objPanel.render();
     
-    if (objStatusPanel.objSettings.bActive) {
+    if (this.objSettings.bActive) {
       this.setActive();
     } else {
       this.setInactive();
     }
-    
   };
   
   objStatusPanel.getPanelMarkup = function() {
@@ -48,6 +47,10 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   };
   
   objStatusPanel.setActive = function(sMessage) {
+    console.log('objStatusPanel.setActive('+this.sCode+')');
+    
+    this.objSettings.bActive = true;
+    
     nsc('#'+this.sCode+'-panel').removeClass();
     nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-active');
     
@@ -60,10 +63,13 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   };
   
   objStatusPanel.getIsPanelActive = function() {
-    return objStatusPanel.objSettings.bActive;
+    return this.objSettings.bActive;
   };
   
   objStatusPanel.setInactive = function(sMessage) {
+    console.log('objStatusPanel.setInactive('+this.sCode+')');
+    this.objSettings.bActive = false;
+    
     nsc('#'+this.sCode+'-panel').removeClass();
     nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-inactive');
     
@@ -75,7 +81,9 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     }
   };
   
-  objStatusPanel.setUpdating = function(sMessage) {    
+  objStatusPanel.setUpdating = function(sMessage) {
+    this.objSettings.bActive = false;
+    
     nsc('#'+this.sCode+'-panel').removeClass();
     nsc('#'+this.sCode+'-panel').addClass('panel status-panel status-panel-updating');
     

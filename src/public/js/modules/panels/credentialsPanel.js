@@ -9,11 +9,11 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
 
   objCredentialsPanel.objChildPanels = {};
   
+  objCredentialsPanel.objSettings.bActive = false;
+  
   objCredentialsPanel.initialize = function() {
-    
-    nsc('#'+this.sCode+'-status-text').text('Updating...');
-    
-    objCredentialsPanel.setUpdating();
+
+    objCredentialsPanel.setUpdating('Updating...');
     
     /* Ask the server if we have an eBay token */    
     var jqxhr = nsc.ajax({

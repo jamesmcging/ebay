@@ -3,16 +3,15 @@ namespace ebay\routes;
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
-use ebay\model\db as db;
 
-$app->get('/store', function (Request $objRequest, Response $objResponse) {
-  
+$app->get('/store/storedata', function (Request $objRequest, Response $objResponse) {
+
   $arrData = array();
-  
+
   try {
     $sQuery = "SELECT count(*) as skucount FROM product";
     $objStatement = $this->objDB->prepare($sQuery);
-    
+
     if ($objStatement->execute()) {
       $sStatement = $this->objDB->query($sQuery);
       $arrCount = $sStatement->fetch(\PDO::FETCH_ASSOC);
@@ -20,14 +19,14 @@ $app->get('/store', function (Request $objRequest, Response $objResponse) {
     } else {
       throw new \Exception($sQuery.' failed in execution');
     }
-    
+
     $sQuery = "SELECT * FROM config";
     $objStatement = $this->objDB->prepare($sQuery);
-    
+
     if ($objStatement->execute()) {
       $sStatement = $this->objDB->query($sQuery);
       $arrResponse = $sStatement->fetch(\PDO::FETCH_ASSOC);
-      
+
       $arrData['objStoreData'] = array();
       $arrData['objStoreData']['location'] = array();
       $arrData['objStoreData']['location']['address'] = array();
@@ -48,14 +47,32 @@ $app->get('/store', function (Request $objRequest, Response $objResponse) {
       $arrData['objStoreData']['locationTypes']                 = array('STORE');
       $arrData['objStoreData']['merchantLocationKey']           = '';
       $arrData['objStoreData']['merchantLocationStatus']        = 'ENABLED';
-      
+
     } else {
       throw new \Exception($sQuery.' failed in execution');
     }    
-    
+
   } catch (Exception $objException) {
     $objResponse->getBody()->write(json_encode($objException));
   }
-  
+
   return $objResponse->withJson($arrData, 200);
+});
+
+$app->get('/store/datamappings', function (Request $objRequest, Response $objResponse) {
+  $nResponseCode   = 400;
+  
+  $objStore = new \ebay\classes\Store($this->objDB);
+  $arrResponseData = $objStore->getDataMappings($nResponseCode);
+  
+  return $objResponse->withJson($arrResponseData, $nResponseCode);
+});
+
+$app->post('/store/datamappings', function (Request $objRequest, Response $objResponse) {    
+  $nResponseCode   = 400;
+  
+  $objStore = new \ebay\classes\Store($this->objDB);
+  $arrResponseData = $objStore->saveDataMappings($objRequest->getParsedBody(), $nResponseCode);
+  
+  return $objResponse->withJson($arrResponseData, $nResponseCode);
 });

@@ -149,7 +149,7 @@ class EbayApiGateway implements EbayStatus {
     
     $this->_arrResponse['sMethod']    = $this->_sMethod;
     $this->_arrResponse['arrParams']  = $this->_arrParams;
-    $this->_arrResponse['sTargetURL'] = $sCurlURL;
+    $this->_arrResponse['sTargetURL'] = isset($sCurlURL) ? $sCurlURL : 'no curl URL set';
     
     return $this->_arrResponse;
   }
