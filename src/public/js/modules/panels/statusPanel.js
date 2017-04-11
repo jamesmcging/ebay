@@ -58,7 +58,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     nsc('#'+this.sCode+'-status-icon').addClass('status-panel-icon fa fa-3x fa-check');
     
     if (sMessage) {
-      nsc('#locationspanel-status-text').text(sMessage);
+      nsc('#'+this.sCode+'-status-text').text(sMessage);
     }  
   };
   

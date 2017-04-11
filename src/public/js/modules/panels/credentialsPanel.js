@@ -12,48 +12,11 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
   objCredentialsPanel.objSettings.bActive = false;
   
   objCredentialsPanel.initialize = function() {
-
     objCredentialsPanel.setUpdating('Updating...');
-    
-    /* Ask the server if we have an eBay token */    
-    var jqxhr = nsc.ajax({
-      url      : '/authorization/status',
-      data     : {},
-      dataType : "json",
-      type     : "get"
-    });
-
-    jqxhr.done(function(responsedata) {
-      objCredentialsPanel.objSettings.nStatus = responsedata['ebay_authorization_status'];
-      
-      if (objCredentialsPanel.objSettings.nStatus === 4) {
-        objCredentialsPanel.objSettings.bActive = true;
-        
-      } else {
-        objCredentialsPanel.objSettings.bActive = false;
-      }
-      
-      objCredentialsPanel.render();
-
-      if (objCredentialsPanel.objSettings.bActive) {
-        nsc('#'+objCredentialsPanel.sCode+'-status-text').text('Signed in and ready to go!');        
-      } else {
-        nsc('#'+objCredentialsPanel.sCode+'-status-text').text('Click here to give us permission to act on your behalf.');
-      }
-      
-      /* We announce this momentious event so other panels can start their work */
-      nsc(document).trigger('credentialsPanelUpdated', [objCredentialsPanel.objSettings.nStatus, objCredentialsPanel.objSettings.bActive]);
-    });
-    
-    jqxhr.fail(function(xhr, status, errorThrown) {
-      console.log('FAIL');
-      console.log(xhr.responseText);
-      console.log(status);
-      console.log(errorThrown);
-    });
+    app.objModel.objEbayAuthorization.updateStatus();
   };
   
-  objCredentialsPanel.getPanelContent = function() {    
+  objCredentialsPanel.getPanelContent = function() {
     var sHTML = '';
     
     sHTML += '<div class="row">';
@@ -86,7 +49,16 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
     
     nsc('#ebay-sign-in').on('click', function() {
       window.location="/authorization/access";
-    });    
+    });
+    
+    nsc(document).on('credentialsPanelUpdated', function(event, nEbayAuthorizationStatus) {
+      console.log('status: '+nEbayAuthorizationStatus);
+      if (nEbayAuthorizationStatus === 4) {
+        objCredentialsPanel.setActive('App ready to use.');
+      } else {
+        objCredentialsPanel.setInactive('Click to login to eBay and give us permission to act on your behalf.');
+      }
+    });
   };
   
   objCredentialsPanel.getModalBodyMarkup = function() {
