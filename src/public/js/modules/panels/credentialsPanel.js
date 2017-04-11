@@ -41,7 +41,7 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
     return sHTML;
   };
   
-  objCredentialsPanel.setListeners = function() {
+  objCredentialsPanel.setListeners = function() {    
     nsc('#'+this.sCode+'-panel').off().on('click', function() {
       objCredentialsPanel.showModal();
       objCredentialsPanel.setListeners();
@@ -52,7 +52,6 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
     });
     
     nsc(document).on('credentialsPanelUpdated', function(event, nEbayAuthorizationStatus) {
-      console.log('status: '+nEbayAuthorizationStatus);
       if (nEbayAuthorizationStatus === 4) {
         objCredentialsPanel.setActive('App ready to use.');
       } else {

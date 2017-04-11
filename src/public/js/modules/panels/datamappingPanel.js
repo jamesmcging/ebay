@@ -69,7 +69,7 @@ define([
       // objDataMappingPanel.refreshModal();
     });
     
-    nsc(document).off().on('datamappingsupdated', function() {
+    nsc(document).off('datamappingsupdated').on('datamappingsupdated', function() {
       objDataMappingPanel.setActive('Data mappings updated');
       if ((nsc('#modal-anchor').data('bs.modal') || {}).isShown) {
         objDataMappingPanel.refreshModal();
