@@ -1,24 +1,15 @@
 // Start the main app logic.
-requirejs(['jquery', 
-  'modules/models/ebayAuthorizationModel', 
-  'modules/models/locationsModel',
-  'modules/models/datamappingModel',
+requirejs(['jquery',
   'modules/interface', 
   'bootstrap'],
   function(
-    nsc, 
-    objEbayAuthorizationModel,
-    objLocationsModel,
-    objDataMappingModel,
+    nsc,
     objInterface
   ) {
   
   app = {};
   
   app.objModel = {};
-  app.objModel.objEbayAuthorization = objEbayAuthorizationModel;
-  app.objModel.objLocations         = objLocationsModel;
-  app.objModel.objDataMappings      = objDataMappingModel;
   
   app.objInterface = objInterface;
   app.objInterface.render();

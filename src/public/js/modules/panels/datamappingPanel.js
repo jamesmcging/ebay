@@ -1,9 +1,11 @@
 define([
   'jquery', 
-  'modules/panels/statusPanel'],
+  'modules/panels/statusPanel',
+  'modules/models/datamappingModel'],
   function(
     nsc, 
-    objStatusPanel
+    objStatusPanel,
+    objDataMappingsModel
   ) {
    
   var objDataMappingPanel = {};
@@ -16,6 +18,12 @@ define([
   objDataMappingPanel.objChildPanels = {};
   
   objDataMappingPanel.initialize = function() {
+    
+    /* Ensure the app has its data mappings model */
+    if (typeof app.objModel.objDataMappings === 'undefined') {
+      app.objModel.objDataMappings = objDataMappingsModel;
+    }
+    
     app.objModel.objDataMappings.initialize();
     app.objModel.objDataMappings.updateDataMappings();
   };

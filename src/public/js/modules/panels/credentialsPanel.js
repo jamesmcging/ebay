@@ -1,4 +1,11 @@
-define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
+define(['jquery', 
+  'modules/panels/statusPanel',
+  'modules/models/ebayAuthorizationModel'
+  ], 
+  function(nsc, 
+  objStatusPanel,
+  objEbayAuthorizationPanel
+  ) {
    
   var objCredentialsPanel = {};
 
@@ -13,6 +20,12 @@ define(['jquery', 'modules/panels/statusPanel'], function(nsc, objStatusPanel) {
   
   objCredentialsPanel.initialize = function() {
     objCredentialsPanel.setUpdating('Updating...');
+    
+    /* Ensure the app has its authorization model */
+    if (typeof app.objModel.objEbayAuthorization === 'undefined') {
+      app.objModel.objEbayAuthorization = objEbayAuthorizationPanel
+    }
+    
     app.objModel.objEbayAuthorization.updateStatus();
   };
   

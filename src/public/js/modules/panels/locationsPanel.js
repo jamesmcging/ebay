@@ -2,12 +2,12 @@ define([
   'jquery',
   'modules/panels/statusPanel',
   'modules/ebayApi/inventory',
-  'modules/panels/summaryPanel'],
+  'modules/models/locationsModel'],
   function(
     nsc, 
     objStatusPanel,
     objApiInventory,
-    objSummaryPanel) {
+    objLocationsModel) {
    
   var objLocationsPanel = {};
 
@@ -21,6 +21,12 @@ define([
   objLocationsPanel.objSettings.objLocations = {};
   
   objLocationsPanel.initialize = function() {
+    
+    /* Ensure the app has its locations model */
+    if (typeof app.objModel.objLocations === 'undefined') {
+      app.objModel.objLocations = objLocationsModel;
+    }
+    
     /* Panel starts of as inactive */
     objLocationsPanel.setInactive('Please sign in to eBay to use the locations panel');
     
