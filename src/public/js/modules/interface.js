@@ -1,12 +1,12 @@
 // Start the main app logic.
 define(['jquery',
   'modules/panels/panel', 
-  'modules/tabs/dashboard', 
-  'modules/tabs/storeCatalogue', 
-  'modules/tabs/ebayCatalogue', 
-  'modules/tabs/ebayListings', 
-  'modules/tabs/ebayOrders',
-  'modules/tabs/tools'
+  'modules/tabs/dashboardTab', 
+  'modules/tabs/storeCatalogueTab', 
+  'modules/tabs/ebayCatalogueTab', 
+  'modules/tabs/ebayListingsTab', 
+  'modules/tabs/ebayOrdersTab',
+  'modules/tabs/toolsTab'
 ],
 function(nsc, 
   objPanel, 

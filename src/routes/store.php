@@ -95,5 +95,79 @@ $app->get('/store/marketplace', function (Request $objRequest, Response $objResp
   }
   $arrData['query'] = $sQuery; 
   
-  return $objResponse->withJson($arrData, $nResponseCode);// withStatus($nResponseCode)->getBody()->write($sResponse);
+  return $objResponse->withJson($arrData, $nResponseCode);
+});
+
+$app->get('/store/cataloguedata', function(Request $objRequest, Response $objResponse) {
+  $sQuery = 'SELECT product_brandname, product_theme, product_departmentid, name, category_id, category_name '
+          . 'FROM product '
+          . 'LEFT JOIN department ON product_departmentid = id '
+          . 'LEFT JOIN category ON product.category_link = category.category_id';
+  
+  try {
+    $arrData = array(
+      'objBrands'      => array(),
+      'objThemes'      => array(),
+      'objDepartments' => array(),
+      'objCategories'  => array()
+    );
+    $objStatement = $this->objDB->prepare($sQuery);
+
+    if ($objStatement->execute()) {
+      while($arrRow = $objStatement->fetch(\PDO::FETCH_ASSOC)) {
+        // Add any brand names
+        if (!in_array($arrRow['product_brandname'], $arrData['objBrands'])
+                && strlen($arrRow['product_brandname']) > 0) {
+          $arrData['objBrands'][] = $arrRow['product_brandname'];
+        }
+        // Add any themes
+        if (!in_array($arrRow['product_theme'], $arrData['objThemes'])
+                && strlen($arrRow['product_theme']) > 0) {
+          $arrData['objThemes'][] = $arrRow['product_theme'];
+        } 
+        // Add any departments
+        if (!isset($arrData['objDepartments'][$arrRow['product_departmentid']])
+                && strlen($arrRow['product_departmentid']) > 0) {
+          $arrData['objDepartments'][$arrRow['product_departmentid']] = $arrRow['name'];
+        }         
+        // Add any catagories
+        if (!isset($arrData['objDepartments'][$arrRow['category_id']])
+                && strlen($arrRow['category_id']) > 0) {
+          $arrData['objCategories'][$arrRow['category_id']] = $arrRow['category_name'];
+        }
+        // Build a tree of departments/ categories
+        if (!isset($arrData['objStoreStructure'][$arrRow['product_departmentid']])
+                && strlen($arrRow['product_departmentid']) > 0) {
+          $arrData['objStoreStructure'][$arrRow['product_departmentid']] = array(
+            'department_id'   => $arrRow['product_departmentid'],
+            'department_name' => $arrRow['name'],
+            'children'        => array()
+          );
+        }
+        if (!isset($arrData['objStoreStructure'][$arrRow['product_departmentid']]['children'][$arrRow['category_id']])
+                && strlen($arrRow['category_id'])) {
+          $arrData['objStoreStructure'][$arrRow['product_departmentid']]['children'][$arrRow['category_id']] = array(
+            'category_id'   => $arrRow['category_id'],
+            'category_name' => $arrRow['category_name']
+          );
+        }
+      }
+      
+      // Sort the brand and theme arrays alphabetically
+      sort($arrData['objBrands']);
+      sort($arrData['objThemes']);
+//      asort($arrData['objDepartments']);
+//      ksort($arrData['objCategories']);
+      
+      $nResponseCode = 200;
+    } else {
+      throw new \Exception($sQuery.' failed in execution');
+    }
+  } catch (Exception $objException) {
+    $arrData['message'] .= 'Exception while fetching catalogue data. Exception message: '.$objException->getMessage();
+    $nResponseCode = 400;
+  }
+  $arrData['query'] = $sQuery; 
+  
+  return $objResponse->withJson($arrData, $nResponseCode);
 });
