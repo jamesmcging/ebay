@@ -59,7 +59,6 @@ function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, ob
     
     sHTML += '</div><!-- .row -->';
     
-    
     return sHTML;
   };
   

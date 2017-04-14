@@ -72,7 +72,7 @@ define([
     nsc(document).off('datamappingsupdated').on('datamappingsupdated', function() {
       objDataMappingPanel.setActive('Data mappings updated');
       if ((nsc('#modal-anchor').data('bs.modal') || {}).isShown) {
-        objDataMappingPanel.refreshModal();
+        objDataMappingPanel.hideModal();
       } else {
         console.log('locations retrieved but modal closed');
       }

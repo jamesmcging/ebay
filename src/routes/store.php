@@ -76,3 +76,24 @@ $app->post('/store/datamappings', function (Request $objRequest, Response $objRe
   
   return $objResponse->withJson($arrResponseData, $nResponseCode);
 });
+
+$app->get('/store/marketplace', function (Request $objRequest, Response $objResponse) {
+  $sQuery = "SELECT * FROM marketplace WHERE marketplace_type='ebay'";
+
+  try {
+    $objStatement = $this->objDB->prepare($sQuery);
+
+    if ($objStatement->execute()) {
+      $arrData['data'] = $objStatement->fetch(\PDO::FETCH_ASSOC);
+      $nResponseCode = 200;
+    } else {
+      throw new \Exception($sQuery.' failed in execution');
+    }
+  } catch (Exception $objException) {
+    $arrData['message'] .= 'Exception while fetching marketplace data. Exception message: '.$objException->getMessage();
+    $nResponseCode = 400;
+  }
+  $arrData['query'] = $sQuery; 
+  
+  return $objResponse->withJson($arrData, $nResponseCode);// withStatus($nResponseCode)->getBody()->write($sResponse);
+});

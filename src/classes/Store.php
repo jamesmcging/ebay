@@ -56,15 +56,10 @@ class Store {
       ON DUPLICATE KEY UPDATE 
         marketplace_type           = 'ebay', 
         marketplace_webstoreid     = '".Credentials::STORE_ID."', 
-        marketplace_data           = '', 
-        marketplace_enabled        = 0,  
-        marketplace_nextrefresh    = 0, 
         marketplace_lastmessage    = 'field mappings saved @".time()."',
         marketplace_categorization = '".json_encode($arrRequestData['datamappings'])."'
       ";
-          
-    
-          
+                   
     $objStatement = $this->_objDB->prepare($sQuery);
     if($objStatement->execute()) {
       $arrResponseData['saved_data_mappings'] = $arrRequestData;

@@ -5,8 +5,18 @@ define(['jquery',
   'modules/tabs/storeCatalogue', 
   'modules/tabs/ebayCatalogue', 
   'modules/tabs/ebayListings', 
-  'modules/tabs/ebayOrders'],
-function(nsc, objPanel, objDashboard, objStoreCatalogue, objEbayCatalogue, objEbayListings, objEbayOrders) {
+  'modules/tabs/ebayOrders',
+  'modules/tabs/tools'
+],
+function(nsc, 
+  objPanel, 
+  objDashboard, 
+  objStoreCatalogue, 
+  objEbayCatalogue, 
+  objEbayListings, 
+  objEbayOrders,
+  objTools
+) {
 
   var objInterface = {};
   objInterface.__proto__ = objPanel;
@@ -18,7 +28,8 @@ function(nsc, objPanel, objDashboard, objStoreCatalogue, objEbayCatalogue, objEb
     storeCatalogue : objStoreCatalogue,
     ebayCatalogue  : objEbayCatalogue,
     ebayListings   : objEbayListings,
-    orders         : objEbayOrders
+    orders         : objEbayOrders,
+    tools          : objTools
   };
   
   objInterface.render = function() {
@@ -42,7 +53,7 @@ function(nsc, objPanel, objDashboard, objStoreCatalogue, objEbayCatalogue, objEb
     /* Handle the tabs being clicked */
     nsc('a[data-toggle="tab"]').on('show.bs.tab', function (event) {
       var sTabPanelCode = nsc(this).parent().data('tabpanel');
-      objInterface.objNavTabs[sTabPanelCode].render();      
+      objInterface.objNavTabs[sTabPanelCode].render();
       objInterface.objNavTabs[sTabPanelCode].initialize();
     });
     
