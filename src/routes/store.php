@@ -141,14 +141,16 @@ $app->get('/store/cataloguedata', function(Request $objRequest, Response $objRes
           $arrData['objStoreStructure'][$arrRow['product_departmentid']] = array(
             'department_id'   => $arrRow['product_departmentid'],
             'department_name' => $arrRow['name'],
-            'children'        => array()
+            'department_link' => "/store/department/{$arrRow['product_departmentid']}/{$arrRow['name']}/",
+            'children'        => array(),
           );
         }
         if (!isset($arrData['objStoreStructure'][$arrRow['product_departmentid']]['children'][$arrRow['category_id']])
                 && strlen($arrRow['category_id'])) {
           $arrData['objStoreStructure'][$arrRow['product_departmentid']]['children'][$arrRow['category_id']] = array(
             'category_id'   => $arrRow['category_id'],
-            'category_name' => $arrRow['category_name']
+            'category_name' => $arrRow['category_name'],
+            'category_link' => "/store/category/{$arrRow['product_departmentid']}/{$arrRow['category_id']}/{$arrRow['category_name']}/"
           );
         }
       }
@@ -163,6 +165,7 @@ $app->get('/store/cataloguedata', function(Request $objRequest, Response $objRes
     } else {
       throw new \Exception($sQuery.' failed in execution');
     }
+    
   } catch (Exception $objException) {
     $arrData['message'] .= 'Exception while fetching catalogue data. Exception message: '.$objException->getMessage();
     $nResponseCode = 400;

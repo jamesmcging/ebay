@@ -5,8 +5,6 @@ define(['jquery'], function(nsc) {
   objPanel.sCode = 'default_panel_code';
   objPanel.objSettings = {};
   
-  objPanel.initialize = function() {};
-  
   objPanel.render = function() {
     nsc('#'+this.sCode+'-panel').replaceWith(this.getPanelMarkup());
     this.setListeners();
@@ -28,7 +26,9 @@ define(['jquery'], function(nsc) {
   };
   
   objPanel.setListeners = function() {};
-  
+    
+  objPanel.initialize = function() {};
+
   objPanel.showModal = function() {
     var sHTML = '';
     

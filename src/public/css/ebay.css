@@ -51,13 +51,21 @@
   margin-bottom: 5px;
 }
 
+#pagination-panel {
+  background-color: #e7e7e7;
+  border: 1px solid #ccc;
+  
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
 /* Store Catalogue Listing Head of Table */
 #head-store-catalogue {
   background-color: #e7e7e7;
   border-left: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   border-right: 1px solid #ccc;
-  
+  height: 60px;
   padding: 5px;
 }
 

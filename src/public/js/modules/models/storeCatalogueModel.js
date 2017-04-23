@@ -13,14 +13,20 @@ define([
     objCataegories    : {},
     objBrands         : {},
     objThemes         : {},
-    objStoreStructure : {}
+    objStoreStructure : {},
+    arrItems          : {}
   };
   
   objStoreCatalogueModel.objFilters = {
-    nDeptID    : 0,
-    nCatID     : 0,
-    sBrandName : null,
-    sTheme     : null
+    nDeptID           : 'all',
+    nCatID            : 'all',
+    sBrandName        : null,
+    sTheme            : null,
+    nOffset           : 0,
+    nLimit            : 20,
+    nItemCount        : 0,
+    sOrderByField     : 'product_name',
+    sOrderByDirection : 'ASC'
   };
 
   objStoreCatalogueModel.N_ITEM_DATA_TTL = (60 * 60 * 24 * 7); // Data has a TTL of 1 week
@@ -48,10 +54,11 @@ define([
     });
     
     jqxhr.always(function() {
-      console.log('storestructureupdated triggered');
-      console.log(objStoreCatalogueModel.objData);
       nsc(document).trigger('storestructureupdated');
     });
+    
+    /* Ask the store for a list of items */
+    objStoreCatalogueModel.getItemsFromAPI();
   };
   
   objStoreCatalogueModel.setListeners = function() {};
@@ -66,14 +73,42 @@ define([
     
   objStoreCatalogueModel.getThemes = function() {
     return objStoreCatalogueModel.objData.objThemes; 
-  };  
+  };
   
+  objStoreCatalogueModel.getItemsFromAPI = function() {
+        
+    var jqxhr = nsc.ajax({
+      url      : '/items',
+      data     : objStoreCatalogueModel.objFilters,
+      dataType : "json",
+      type     : "get"
+    });
+
+    jqxhr.done(function(responsedata) {
+      objStoreCatalogueModel.objData.arrItems      = responsedata.arrItemData;
+      objStoreCatalogueModel.objFilters.nItemCount = responsedata.nItemCount;
+    });
+    
+    jqxhr.fail(function(xhr, status, errorThrown) {
+      console.log('FAIL');
+      console.log(xhr.responseText);
+      console.log(status);
+      console.log(errorThrown);
+    });
+    
+    jqxhr.always(function() {
+      nsc(document).trigger('objItemsUpdated');
+    });
+  };
   
-  
-  
-  
-  
-  
+  objStoreCatalogueModel.getItemByIndex = function(nKey) {
+    var response = false;
+    if (typeof objStoreCatalogueModel.objData.arrItems[nKey] !== 'undefined') {
+      response = objStoreCatalogueModel.objData.arrItems[nKey];
+    }
+    return response;
+  };
+
   //////////////////////////////////////////////////////////////////////////////
   // The following is if we decide to use localstorage for the store catalogue//
   //////////////////////////////////////////////////////////////////////////////

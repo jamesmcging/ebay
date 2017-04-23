@@ -5,40 +5,16 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use \ebay\src\resources as Items;
 
-
+/**
+ * The catalogue service looks after all requests for items. As the catalogue
+ * service only supports get requests we can simply redirect any requests to the
+ * catalogue service
+ */
 $app->get('/items', function (Request $objRequest, Response $objResponse) {
-  
-  $objItems = new Items($objRequest, $objResponse);
-  $objItems->get();
-  
-  
-  $arrFields = array();
-  $sSelectStatement = join(', ', $arrFields);
-  
-  $objDB = DB::getInstance();
-  
-  $sQuery = "SELECT product_id, product_name FROM product";
-
-  try {
-    
-    $sStatement = $objDB->query($sQuery);
-    
-    $arrItems = $sStatement->fetchAll(PDO::FETCH_OBJ);
-    
-    $response->getBody()->write(json_encode($arrItems));
-    
-  } catch (Exception $objException) {
-    $response->getBody()->write(json_encode($objException));
+  $arrQueryParams = $objRequest->getQueryParams();
+  if (count($arrQueryParams)) {
+    return $objResponse->withAddedHeader('location', 'http://localhost:8000/index.php/items?'.http_build_query($arrQueryParams));
+  } else {
+    return $objResponse->withAddedHeader('location', 'http://localhost:8000/index.php/items');    
   }
-  
-//
-//  echo "<pre>";
-//  var_dump($request);
-//  echo "</pre>";
-//  echo "<hr>";
-//  
- 
-    $response->getBody()->write("item resource");
-
-    return $response;
 });

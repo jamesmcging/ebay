@@ -1,15 +1,15 @@
 define(['jquery',
-    'modules/panels/panel'], function(nsc, objPanel) {
+    'modules/panels/panel'], 
+  function(nsc, 
+    objPanel) {
     
   var objTab = {};
   
   objTab.__proto__ = objPanel;
   
-  objTab.sName = 'Default Panel Name';
-  objTab.sCode = 'default_panel_code';
-  
-  objTab.initialize = function() {};
-  
+  objTab.sName = 'Default Tab Name';
+  objTab.sCode = 'default_tab_code';
+
   objTab.render = function() {    
     nsc('#'+this.sCode+'-panel').replaceWith(this.getPanelMarkup());
     this.setListeners();
@@ -23,13 +23,15 @@ define(['jquery',
     return sHTML;
   };
   
+  objTab.setListeners = function() {};
+  
+  objTab.initialize = function() {};
+  
   objTab.getPanelContent = function() {
     var sHTML = '';
     sHTML += this.sName;
     return sHTML;
   };
-  
-  objTab.setListeners = function() {};
   
   return objTab;
 });

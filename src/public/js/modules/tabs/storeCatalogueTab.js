@@ -23,9 +23,23 @@ define(['jquery',
     listingpanel : objStoreCatalogueListingPanel
   };
   
-  objStoreCatalogue.initialize = function() {
+  objStoreCatalogue.getPanelContent = function() {
+    var sHTML = '';
+    for (var sPanelCode in objStoreCatalogue.objChildPanels) {
+      sHTML += objStoreCatalogue.objChildPanels[sPanelCode].getPanelMarkup();
+    }
     
-    /* Ensure the app has its authorization model */
+    return sHTML;
+  };
+  
+  objStoreCatalogue.setListeners = function() {
+    for (var sPanelCode in objStoreCatalogue.objChildPanels) {
+      objStoreCatalogue.objChildPanels[sPanelCode].setListeners();
+    }    
+  };
+    
+  objStoreCatalogue.initialize = function() {
+    /* Ensure the panel has its model */
     if (typeof app.objModel.objStoreCatalogueModel === 'undefined') {
       app.objModel.objStoreCatalogueModel = objStoreCatalogueModel;
       app.objModel.objStoreCatalogueModel.initialize();
@@ -35,19 +49,6 @@ define(['jquery',
       objStoreCatalogue.objChildPanels[sPanelCode].initialize();
     }
   };
-  
-  objStoreCatalogue.getPanelContent = function() {
-    var sHTML = '';
-    sHTML += '<h3>Store Catalogue</h3>';
-    sHTML += '<div>';
-    for (var sPanelCode in objStoreCatalogue.objChildPanels) {
-      sHTML += objStoreCatalogue.objChildPanels[sPanelCode].getPanelMarkup();
-    }
-    sHTML += '</div>';
-    return sHTML;
-  };
-  
-  objStoreCatalogue.setListeners = function() {};
-  
+ 
   return objStoreCatalogue;
 });
