@@ -36,7 +36,7 @@ define([
     /* Ask the store for details such as a list of departments, categories, 
      * brands, themes that can be used to filter store products */
     var jqxhr = nsc.ajax({
-      url      : '/store/cataloguedata',
+      url      : app.objModel.objURLs.sStoreURL+'/store/cataloguedata',
       data     : {},
       dataType : "json",
       type     : "get"
@@ -78,7 +78,7 @@ define([
   objStoreCatalogueModel.getItemsFromAPI = function() {
         
     var jqxhr = nsc.ajax({
-      url      : '/items',
+      url      : app.objModel.objURLs.sCatalogueURL+'/items',
       data     : objStoreCatalogueModel.objFilters,
       dataType : "json",
       type     : "get"

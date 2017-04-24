@@ -8,7 +8,7 @@ define(['jquery'], function(nsc) {
 
     /* Ask the server if we have an eBay token */    
     var jqxhr = nsc.ajax({
-      url      : '/authorization/status',
+      url      : app.objModel.objURLs.sStoreURL+'/authorization/status',
       data     : {},
       dataType : "json",
       type     : "get"

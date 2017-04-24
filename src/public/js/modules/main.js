@@ -11,6 +11,9 @@ requirejs(['jquery',
   
   app.objModel = {};
   
+  // These are loaded into the global space by the backend on page load
+  app.objModel.objURLs = objURLs;
+  
   app.objInterface = objInterface;
   app.objInterface.render();
   app.objInterface.setListeners();

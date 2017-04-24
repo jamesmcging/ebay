@@ -193,7 +193,7 @@ define([
   
   objDataMappingModel.updateDataMappings = function() {
     var jqxhr = nsc.ajax({
-      url      : '/store/datamappings',
+      url      : app.objModel.objURLs.sStoreURL+'/store/datamappings',
       dataType : "json",
       type     : "get"
     });
@@ -223,7 +223,7 @@ define([
   
   objDataMappingModel.saveDataMappings = function() {
     var jqxhr = nsc.ajax({
-      url      : '/store/datamappings',
+      url      : app.objModel.objURLs.sStoreURL+'/store/datamappings',
       data     : {datamappings: objDataMappingModel.objDatamappings},
       dataType : "json",
       type     : "post"

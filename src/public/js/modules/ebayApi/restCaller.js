@@ -24,7 +24,7 @@ define(['jquery'], function(nsc) {
     };
 
     var jqxhr = nsc.ajax({
-      url      : '/ebay/',
+      url      : app.objModel.objURLs.sStoreURL+'/ebay/',
       data     : objParams,
       dataType : 'json',
       type     : 'get'

@@ -7,6 +7,21 @@ use ebay\src\resources\Homepage as Homepage;
 
 $app->get('/', function (Request $objRequest, Response $objResponse) {
   
+  // Determine the URLs of the various services used by the app. These vary
+  // depending on whether the pp is running in dev mode or on the live servers
+  if (isset($_SERVER['EBAY_ENVIRONMENT']) && $_SERVER['EBAY_ENVIRONMENT'] == \ebay\interfaces\EnvironmentInterface::DEV_MODE) {
+    $arrURLs = array(
+      'sStoreURL'     => 'http://www.alaname.ie',
+      'sCatalogueURL' => 'http://catalogue.alaname.ie'
+    );
+  } else {
+    $arrURLs = array(
+      'sStoreURL'     => 'https://www.alaname.com',
+      'sCatalogueURL' => 'https://catalogue.alaname.com'
+    );
+  }
+  $sURLs = 'objURLs = '.json_encode($arrURLs);
+
   $sHTML = <<<HTML
       <!DOCTYPE html>
       <html lang="en">
@@ -23,7 +38,8 @@ $app->get('/', function (Request $objRequest, Response $objResponse) {
           <link rel="shortcut icon" href="about:blank">
           </head>
         <body>
-          <div>         
+          <div>
+            <script>{$sURLs}</script>
             <script src="js/config.js"></script>
             <script data-main="modules/main" src="js/lib/require.js"></script>
           </div>
