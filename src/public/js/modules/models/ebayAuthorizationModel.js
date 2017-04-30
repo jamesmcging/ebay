@@ -4,6 +4,10 @@ define(['jquery'], function(nsc) {
 
   objEbayAuthorizationModel.nStatus = 1;
   
+  objEbayAuthorizationModel.initialize = function() {
+    objEbayAuthorizationModel.updateStatus();
+  };
+  
   objEbayAuthorizationModel.updateStatus = function() {
 
     /* Ask the server if we have an eBay token */    

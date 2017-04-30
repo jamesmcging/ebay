@@ -1,4 +1,11 @@
-define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
+define(['jquery', 
+  'modules/panels/panel',
+  'modules/ebayApi/inventory',
+  'modules/models/ebayCatalogueModel'
+  ], function(nsc, 
+  objPanel,
+  objInventoryApi,
+  objEbayCatalogueModel) {
    
   var objSummaryPanel = {};
 
@@ -9,13 +16,18 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
 
   objSummaryPanel.objChildPanels = {};
   objSummaryPanel.objSettings.nStoreSkuCount    = 'unknown';
-  objSummaryPanel.objSettings.nEbaySkuCount     = 'unknown';
+  objSummaryPanel.objSettings.nEbaySkuCount     = objEbayCatalogueModel.getItemCount();
   objSummaryPanel.objSettings.nEbayOfferCount   = 'unknown';
   objSummaryPanel.objSettings.nEbayListingCount = 'unknown';
   objSummaryPanel.objSettings.nEbayOrderCount   = 'unknown';
   
   objSummaryPanel.initialize = function() {
-    objSummaryPanel.refresh();
+    /* Ask the store for item count */
+    objSummaryPanel.getStoreItemCount();
+    
+    /* Retrieving the Ebay sku count requires the app to be ebay authorized. We
+     * therefore only fetch the ebay sku count on credentialsPanelUpdated. This
+     * can be found in objSummaryPanel.setListeners. */
   };
   
   objSummaryPanel.getPanelContent = function() {
@@ -39,7 +51,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     sHTML += '</tr>';
     sHTML += '<tr>';
     sHTML += '<td>eBay Sku Count</td>';
-    sHTML += '<td>'+objSummaryPanel.objSettings.nEbaySkuCount+'</td>';
+    sHTML += '<td>'+objEbayCatalogueModel.getItemCount()+'</td>';
     sHTML += '</tr>';
     sHTML += '<tr>';
     sHTML += '<td>eBay Offer Count</td>';
@@ -64,11 +76,15 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   
   objSummaryPanel.setListeners = function() {
     nsc('#refresh-summary-panel').off().on('click', function() {
-      objSummaryPanel.refresh();
+      objSummaryPanel.render();
+    });
+    
+    nsc(document).on('updateSummaryPanel', function() {
+      objSummaryPanel.render();
     });
   };
   
-  objSummaryPanel.refresh = function() {
+  objSummaryPanel.getStoreItemCount = function() {
     /* Ask the store for figures */    
     var jqxhr = nsc.ajax({
       url      : '/store/storedata',
@@ -78,9 +94,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     });
 
     jqxhr.done(function(responsedata) {
-      objSummaryPanel.objSettings.nStoreSkuCount = responsedata.nStoreSkuCount;
-      objSummaryPanel.objSettings.objStoreData    = responsedata.objStoreData;
-      objSummaryPanel.render();
+      objSummaryPanel.updateStoreItemCount(responsedata);
     });
     
     jqxhr.fail(function(xhr, status, errorThrown) {
@@ -89,8 +103,17 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
       console.log(status);
       console.log(errorThrown);
     });
-    
-    /* Ask eBay for figures */
+  };
+  
+  objSummaryPanel.updateStoreItemCount = function(objData) {
+    objSummaryPanel.objSettings.nStoreSkuCount = objData.nStoreSkuCount;
+    objSummaryPanel.objSettings.objStoreData   = objData.objStoreData;
+    objSummaryPanel.render();
+  };
+  
+  objSummaryPanel.updateEbayItemCount = function(objData) {
+    objSummaryPanel.objSettings.nEbaySkuCount = objData.sResponseMessage.total;
+    objSummaryPanel.render();
   };
   
   return objSummaryPanel;

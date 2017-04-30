@@ -47,7 +47,7 @@ class EbayApiGateway implements EbayStatus {
   }
   
   public function setRestMethod($sMethod) {    
-    if (in_array(strtoupper($sMethod), array('GET', 'POST', 'DELETE'))) {
+    if (in_array(strtoupper($sMethod), array('GET', 'POST', 'DELETE', 'PUT'))) {
       $this->_sMethod = strtoupper($sMethod);
     }
     return $this;

@@ -24,6 +24,12 @@ define(['jquery',
   };
   
   objStoreCatalogue.getPanelContent = function() {
+    /* Ensure the panel has its model */
+    if (typeof app.objModel.objStoreCatalogueModel === 'undefined') {
+      app.objModel.objStoreCatalogueModel = objStoreCatalogueModel;
+      app.objModel.objStoreCatalogueModel.initialize();
+    }
+    
     var sHTML = '';
     for (var sPanelCode in objStoreCatalogue.objChildPanels) {
       sHTML += objStoreCatalogue.objChildPanels[sPanelCode].getPanelMarkup();
@@ -39,12 +45,6 @@ define(['jquery',
   };
     
   objStoreCatalogue.initialize = function() {
-    /* Ensure the panel has its model */
-    if (typeof app.objModel.objStoreCatalogueModel === 'undefined') {
-      app.objModel.objStoreCatalogueModel = objStoreCatalogueModel;
-      app.objModel.objStoreCatalogueModel.initialize();
-    }
-    
     for (var sPanelCode in objStoreCatalogue.objChildPanels) {
       objStoreCatalogue.objChildPanels[sPanelCode].initialize();
     }

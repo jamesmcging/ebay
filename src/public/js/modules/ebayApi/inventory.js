@@ -5,7 +5,7 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
   objInventoryApi.__proto__ = objRestCaller;
   
   objInventoryApi.sApiName = 'inventory';
-    
+
   /**
    * GET /location
    * @param {type} sCallbackFunction
@@ -42,6 +42,15 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
   objInventoryApi.updateLocation = function(sLocationKey, sSerializedData, sCallbackFunction) {
     // POST https://api.ebay.com/sell/inventory/v1/location/{merchantLocationKey}/update_location_details
     this.makeCall('post', objInventoryApi.sApiName, 'location', sLocationKey+'/update_location_details', sSerializedData, sCallbackFunction);
+  };
+  
+  objInventoryApi.getInventoryItems = function(nLimit, nOffset, sCallbackFunction) {
+    // GET https://api.ebay.com/sell/inventory/v1/inventory_item?limit=string&offset=string
+    this.makeCall('get', objInventoryApi.sApiName, 'inventory_item', '', {limit: nLimit, offset:nOffset}, sCallbackFunction);
+  };
+  
+  objInventoryApi.createOrUpdateInventoryItem = function(sProductCode, sSerializedData, sCallbackFunction) {
+    this.makeCall('put', objInventoryApi.sApiName, 'inventory_item', sProductCode, sSerializedData, sCallbackFunction);
   };
   
   return objInventoryApi;
