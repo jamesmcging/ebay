@@ -44,14 +44,25 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
     this.makeCall('post', objInventoryApi.sApiName, 'location', sLocationKey+'/update_location_details', sSerializedData, sCallbackFunction);
   };
   
+  /**
+   * 
+   * @param {int} nLimit
+   * @param {int} nOffset
+   * @param {string} sCallbackFunction
+   * @returns {undefined} returns to specified callback function
+   */
   objInventoryApi.getInventoryItems = function(nLimit, nOffset, sCallbackFunction) {
     // GET https://api.ebay.com/sell/inventory/v1/inventory_item?limit=string&offset=string
     this.makeCall('get', objInventoryApi.sApiName, 'inventory_item', '', {limit: nLimit, offset:nOffset}, sCallbackFunction);
   };
   
-  objInventoryApi.createOrUpdateInventoryItem = function(sProductCode, sSerializedData, sCallbackFunction) {
-    this.makeCall('put', objInventoryApi.sApiName, 'inventory_item', sProductCode, sSerializedData, sCallbackFunction);
+  objInventoryApi.createOrUpdateInventoryItem = function(sProductCode, objProductData, sCallbackFunction) {
+    this.makeCall('put', objInventoryApi.sApiName, 'inventory_item', sProductCode, objProductData, sCallbackFunction);
   };
+  
+  objInventoryApi.deleteInventoryItem = function(sProductCode, objProductData, sCallbackFunction) {
+    this.makeCall('delete', objInventoryApi.sApiName, 'inventory_item', sProductCode, {}, sCallbackFunction);
+  };  
   
   return objInventoryApi;
 });

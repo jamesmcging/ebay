@@ -101,14 +101,16 @@ define([
     });
   };
   
-  objStoreCatalogueModel.getItemByIndex = function(nKey) {
+  objStoreCatalogueModel.getItemByID = function(nProductID) {
     var response = false;
-    if (typeof objStoreCatalogueModel.objData.arrItems[nKey] !== 'undefined') {
-      response = objStoreCatalogueModel.objData.arrItems[nKey];
+    for (var i = 0, nLength = objStoreCatalogueModel.objData.arrItems.length; i < nLength; i++) {
+      if (objStoreCatalogueModel.objData.arrItems[i].product_id == nProductID) {
+        return objStoreCatalogueModel.objData.arrItems[i]; 
+      }
     }
     return response;
   };
-  
+    
   //////////////////////////////////////////////////////////////////////////////
   // The following is if we decide to use localstorage for the store catalogue//
   //////////////////////////////////////////////////////////////////////////////
@@ -170,6 +172,16 @@ define([
       objItem = JSON.parse(sItem);
     }
     return objItem;
+  };
+  
+  objStoreCatalogueModel.getItemByCode = function(sProductCode) {
+    var arrStoreCatalogue = app.objModel.objStoreCatalogueModel.objData.arrItems;
+    for (var i = 0, nLength = arrStoreCatalogue.length; i < nLength; i++) {
+      if (arrStoreCatalogue[i].product_code === sProductCode) {
+        return arrStoreCatalogue[i];
+      }
+    }
+    return false;
   };
 
   return objStoreCatalogueModel;

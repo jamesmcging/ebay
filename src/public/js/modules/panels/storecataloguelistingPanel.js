@@ -1,10 +1,8 @@
 define(['jquery', 
   'modules/panels/panel',
-  'modules/models/storeCatalogueModel'
   ], 
   function(nsc, 
-  objPanel,
-  objStoreCatalogueModel
+  objPanel
   ) {
    
   var objStoreCatalogueListingPanel = {};
@@ -68,14 +66,20 @@ define(['jquery',
         app.objModel.objStoreCatalogueModel.objFilters.sOrderByDirection = 'ASC';
       }
       app.objModel.objStoreCatalogueModel.objFilters.sOrderByField = nsc(this).data('sortfield');
-      objStoreCatalogueModel.getItemsFromAPI();
+      app.objModel.objStoreCatalogueModel.getItemsFromAPI();
     });
     
-    /* This code causes a detailed view of a product to be shown */
-    nsc('.btn-action').off().on('click', function() {
-      var nProductID = nsc(this).parent().data('product_id');
-      objStoreCatalogueListingPanel.getProductDetails(nProductID, true);
+    /* This code causes the selected product to be pushed to the ebay inventory */
+    nsc('.push-to-ebay').off().on('click', function() {
+      var nProductID = nsc(this).data('productid');
+      app.objModel.objEbayCatalogueModel.pushItemToEBay(nProductID);
     });
+    
+    /* This code causes the selected product to be deleted from the ebay inventory */
+    nsc('.remove-from-ebay').off().on('click', function() {
+      var nProductID = nsc(this).data('productid');
+      app.objModel.objEbayCatalogueModel.deleteItemFromEBay(nProductID);
+    });    
     
     nsc('#item-limit-menu').on('change', function() {
       app.objModel.objStoreCatalogueModel.objFilters.nLimit = nsc(this).val();
@@ -284,7 +288,7 @@ define(['jquery',
     /* The item image */
     sHTML += '<div class="col-sm-1">';
     if (objItem.product_image.length) {
-      sHTML += '  <img src="/product_images/1/3/'+objItem.product_image+'" title="image of '+objItem.productimage+'">';
+      sHTML += '  <img style="width:100%" src="'+objItem.product_image+'" title="image of '+objItem.productimage+'">';
     }
     sHTML += '</div>';
     
@@ -325,27 +329,57 @@ define(['jquery',
     sHTML += '</div>';
     
     /* The action button */
+    sHTML += objStoreCatalogueListingPanel.getButtonMarkup(objItem);
+
+    sHTML += '</div>';
+    
+    return sHTML;
+  };
+    
+  objStoreCatalogueListingPanel.getButtonMarkup = function(objItem) {
+    var nItemStatus  = app.objModel.objEbayCatalogueModel.getItemStatus(objItem.product_id);
+    var sButtonText  = 'Push to eBay';
+    var sButtonClass = 'btn';
+    var sDisabled    = '';
+    
+    switch (nItemStatus) {
+      case "NOT_ON_EBAY":
+        sButtonText  = 'Push to eBay';
+        sButtonClass = 'btn push-to-ebay';
+        break;
+        
+      case "ON_EBAY": 
+        sButtonText = 'Update on eBay';
+        sButtonClass = 'btn push-to-ebay';
+        break;
+
+      default: 
+        sButtonText  = 'UNKNOWN';
+        sButtonClass = 'btn';
+        sDisabled    = 'disabled="disabled"';
+    }
+
+    var sHTML = '';
     sHTML += '<div class="col-sm-3 text-right">';
-    sHTML += '<div class="btn-group" ';
-    sHTML += 'data-product_id="'+objItem.product_id+'"';
-    sHTML += '>';
-    sHTML += '<button class="btn btn-action">View Details</button>';
+    sHTML += '<div class="btn-group">';
+    sHTML += '<button id="push-to-ebay-' + objItem.product_id + '"';
+    sHTML += ' data-productid="' + objItem.product_id + '"';
+    sHTML += ' class="' + sButtonClass + '"';
+    sHTML += sDisabled + '>';
+    sHTML += sButtonText;
+    sHTML += '</button>';
     sHTML += '<button class="btn dropdown-toggle"';
     sHTML += 'data-toggle="dropdown" ';
     sHTML += '>';
     sHTML += '<span class="caret"></span>';
     sHTML += '</button>';
     sHTML += '<ul class="dropdown-menu">';
-    sHTML += '<li><a href="btn-action2" class="btn-action">Action 2</a></li>';
+    sHTML += '<li><a href="btn-action2" class="btn-action remove-from-ebay">Remove from eBay</a></li>';
     sHTML += '</ul>';
     sHTML += '</div>';
     sHTML += '</div>';
-
-    
-    sHTML += '</div>';
-    
     return sHTML;
-  };
+  }
     
   objStoreCatalogueListingPanel.getItemListPagination = function() {
     
@@ -478,7 +512,7 @@ define(['jquery',
   };
   
   objStoreCatalogueListingPanel.getProductDetails = function(nProductID, bRenderDetails) {
-    var objDetails = app.objCatalogueModel.getItem(nProductID);
+    var objDetails = app.objModel.objEbayCatalogueModel.getItem(nProductID);
     
     /* If we already have a details panel open, we first close it */
     if (nsc('#item-listing-panel').attr('class') !== 'span12') {

@@ -32,7 +32,7 @@ define(['jquery'], function(nsc) {
 
     jqxhr.done(function(responsedata) {
       responsedata.bOutcome = true;
-      sCallBackFunction(responsedata);
+      sCallBackFunction(responsedata, sResourceId, objCallParams);
     });
     
     jqxhr.fail(function(xhr, status, errorThrown) {
@@ -41,7 +41,7 @@ define(['jquery'], function(nsc) {
       console.log(status);
       console.log(errorThrown);
       xhr.bOutcome = false;
-      sCallBackFunction(xhr);
+      sCallBackFunction(xhr, sResourceId, objCallParams);
     });
   };
 

@@ -83,7 +83,7 @@ define([
     quantity             : {node: 'availability.shipToLocationAvailability.quantity', required: true, default: 'product_stock', datatype:'integer'},
     condition            : {node: 'condition', required: true, default: '', datatype:'enum', possible_values: ['NEW', 'NEW_OTHER', 'NEW_WITH_DEFECTS', 'SELLER_REFURBISHED', 'USED_ACCEPTABLE', 'USED_EXCELLENT', 'USED_GOOD', 'USED_VERY_GOOD', 'FOR_PARTS_OR_NOT_WORKING', 'LIKE_NEW', 'MANUFACTURER_REFURBISHED']},
     conditionDescription : {node: 'conditionDescription', required: false, default: '', datatype: 'string', maxlength: 1000},
-    unit                 : {node: 'packageWeightAndSize.weight', required: false, default: '', datatype: 'enum', possible_values: ['GRAM', 'KILGRAM', 'OUNCE', 'POUND']},
+    unit                 : {node: 'packageWeightAndSize.weight', required: false, default: '', datatype: 'enum', possible_values: ['GRAM', 'KILOGRAM', 'OUNCE', 'POUND']},
     value                : {node: 'packageWeightAndSize.unit', required: false, default: 'product_weight', datatype: 'number'},
     aspects              : {node: 'product.aspects', required: false, default: '', datatype:'array_of_strings'},
     brand                : {node: 'product.brand', required: false, default: 'product_brandname', datatype: 'string', maxlength: 65},
@@ -95,7 +95,7 @@ define([
     subtitle             : {node: 'product.subtitle', required: false, default: '', datatype: 'string', maxlength: 55},      
     title                : {node: 'product.title', required: false, default: '', datatype: 'string', maxlength: 80},
     upc                  : {node: 'product.upc', required: false, default: '', datatype: 'array_of_strings'},
-    sku                  : {node: 'sku', required: true, default: 'product_code', datatype: 'strings', maxlength: 50},
+    sku                  : {node: 'sku', required: true, default: 'product_code', datatype: 'strings', maxlength: 50}
   };
           
   objDataMappingModel.arrProductFields = [
@@ -246,6 +246,73 @@ define([
   objDataMappingModel.resetDataMappings = function() {
     objDataMappingModel.objDatamappings = objDataMappingModel.objDefaultMappings;
     objDataMappingModel.saveDataMappings();
+  };
+  
+  objDataMappingModel.getItemDataByField = function(sFieldName, objItem) {
+    var sData = '';
+    switch (sFieldName) {
+      case 'availability.shipToLocationAvailability.quantity' :
+        sData = objItem[objDataMappingModel.objDatamappings.availability.shipToLocationAvailability.quantity];
+        break;
+      case 'condition' :
+        sData = objItem[objDataMappingModel.objDatamappings.condition];
+        break;
+      case 'conditionDescription' :
+        sData = objItem[objDataMappingModel.objDatamappings.conditionDescription];
+        break;
+      case 'packageWeightAndSize.dimensions.height' :
+        sData = objItem[objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.height];
+        break;
+      case 'packageWeightAndSize.dimensions.length' :
+        sData = objItem[objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.length];
+        break;
+      case 'packageWeightAndSize.dimensions.unit' :
+        sData = objItem[objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.unit];
+        break;
+      case 'packageWeightAndSize.dimensions.width' :
+        sData = objItem[objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.width];
+        break;
+      case 'packageWeightAndSize.packageType' :
+        sData = objItem[objDataMappingModel.objDatamappings.packageWeightAndSize.packageType];
+        break;
+      case 'packageWeightAndSize.weight.unit' :
+        sData = objItem[objDataMappingModel.objDatamappings.packageWeightAndSize.weight.unit];
+        break;        
+      case 'packageWeightAndSize.weight.value' :
+        sData = objItem[objDataMappingModel.objDatamappings.packageWeightAndSize.weight.value];
+        break;
+      case 'product.aspects' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.aspects];
+        break;
+      case 'product.brand' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.brand];
+        break;
+      case 'product.description' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.description];
+        break;
+      case 'product.ean' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.ean];
+        break;      
+      case 'product.imageUrls' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.imageUrls];
+        break;
+      case 'product.isbn' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.isbn];
+        break;
+      case 'product.mpn' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.mpn];
+        break;  
+      case 'product.subtitle' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.subtitle];
+        break;  
+      case 'product.title' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.title];
+        break;
+      case 'product.upc' :
+        sData = objItem[objDataMappingModel.objDatamappings.product.upc];
+        break;
+    }
+    return sData;
   };
   
   return objDataMappingModel;

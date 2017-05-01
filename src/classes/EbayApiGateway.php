@@ -110,7 +110,21 @@ class EbayApiGateway implements EbayStatus {
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
         curl_setopt($rscCurl, CURLOPT_POST, 1);
         curl_setopt($rscCurl, CURLOPT_POSTFIELDS, json_encode($this->_arrParams));
+
+      } elseif ($this->_sMethod === 'PUT') {
+        // createOrUpdate REST calls have an extra mandatory header
+        if ($this->_sResource === 'inventory_item') {
+          curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
+            'Content-Type: application/json',
+            'Content-Language: en-US'
+          ));
+        }
         
+        curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
+        curl_setopt($rscCurl, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($rscCurl, CURLOPT_POSTFIELDS, json_encode($this->_arrParams));
+     
       } elseif ($this->_sMethod === 'DELETE') {
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
         curl_setopt($rscCurl, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -149,6 +163,7 @@ class EbayApiGateway implements EbayStatus {
     
     $this->_arrResponse['sMethod']    = $this->_sMethod;
     $this->_arrResponse['arrParams']  = $this->_arrParams;
+    $this->_arrResponse['sParams']    = http_build_query($this->_arrParams);
     $this->_arrResponse['sTargetURL'] = isset($sCurlURL) ? $sCurlURL : 'no curl URL set';
     
     return $this->_arrResponse;
