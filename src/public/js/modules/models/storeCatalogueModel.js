@@ -14,7 +14,8 @@ define([
     objBrands         : {},
     objThemes         : {},
     objStoreStructure : {},
-    arrItems          : {}
+    arrItems          : [],
+    sCurrencySymbol   : '€'
   };
   
   objStoreCatalogueModel.objFilters = {
@@ -44,7 +45,9 @@ define([
     });
 
     jqxhr.done(function(responsedata) {
-      objStoreCatalogueModel.objData = responsedata;
+      for (var sKey in responsedata) {
+        objStoreCatalogueModel.objData[sKey] = responsedata[sKey];
+      }
     });
     
     jqxhr.fail(function(xhr, status, errorThrown) {
@@ -86,7 +89,12 @@ define([
     });
 
     jqxhr.done(function(responsedata) {
-      objStoreCatalogueModel.objData.arrItems      = responsedata.arrItemData;
+      if (typeof objStoreCatalogueModel.objData.arrItems === 'undefined') {
+        objStoreCatalogueModel.objData.arrItems = [];
+      }
+      for (var i in responsedata.arrItemData) {
+        objStoreCatalogueModel.objData.arrItems.push(responsedata.arrItemData[i]);
+      }
       objStoreCatalogueModel.objFilters.nItemCount = responsedata.nItemCount;
     });
     

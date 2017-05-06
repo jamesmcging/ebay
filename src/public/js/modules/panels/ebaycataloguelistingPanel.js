@@ -155,7 +155,8 @@ define(['jquery',
     
     /* The item price */
     sHTML += '<div class="col-sm-1 text-right">';
-    sHTML += '';//objStoreCatalogueListingPanel.sCurrencySymbol + objEbayItem.product_price;
+    var objStoreItem = app.objModel.objStoreCatalogueModel.getItemByCode(objEbayItem.sku);
+    sHTML += app.objModel.objStoreCatalogueModel.objData.sCurrencySymbol + objStoreItem.product_price;
     sHTML += '</div>';
     
     /* The action button */

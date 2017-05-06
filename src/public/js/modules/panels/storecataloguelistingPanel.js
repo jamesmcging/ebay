@@ -122,8 +122,6 @@ define(['jquery',
   
   objStoreCatalogueListingPanel.sCatalogueKey = 'store_catalogue';
   
-  objStoreCatalogueListingPanel.sCurrencySymbol = '';
-  
   objStoreCatalogueListingPanel.objPossibleProducts = {};
   
   objStoreCatalogueListingPanel.setActive = function() {
@@ -311,7 +309,7 @@ define(['jquery',
     
     /* The item price */
     sHTML += '<div class="col-sm-1 text-right">';
-    sHTML += objStoreCatalogueListingPanel.sCurrencySymbol + objItem.product_price;
+    sHTML += app.objModel.objStoreCatalogueModel.objData.sCurrencySymbol + objItem.product_price;
     sHTML += '</div>';
     
     /* The action button */
