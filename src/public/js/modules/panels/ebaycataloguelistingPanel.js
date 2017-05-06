@@ -17,6 +17,12 @@ define(['jquery',
   
   objEbayCatalogueListingPanel.objSettings.bActive = false;
    
+  /* At some point getPanelMarkup became getPanelContent but in order to call
+   * objPanel.render() we still need getPanelMarkup */
+  objEbayCatalogueListingPanel.getPanelMarkup = function() {
+    return objEbayCatalogueListingPanel.getPanelContent();
+  };
+   
   objEbayCatalogueListingPanel.getPanelContent = function() {
     var sHTML = '';
 
@@ -40,6 +46,16 @@ define(['jquery',
   objEbayCatalogueListingPanel.setListeners = function() {
     nsc(document).on('ebayCatalogueUpdated', function() {
       console.log('objEbayCatalogueListingPanel notices that ebayCatalogueUpdated has triggered');
+    });
+    
+    nsc(document).on('ebayCatalogueItemDeleted', function(event, sProductCode) {
+      console.log(app.objModel.objEbayCatalogueModel.objItems);
+      nsc('#ebay-catalogue-item-'+sProductCode).fadeOut(300, function(){nsc(this).remove();});
+    });
+    
+    nsc('.remove_from_ebay').off().on('click', function() {
+      var sItemSku = nsc(this).data('itemsku');
+      app.objModel.objEbayCatalogueModel.deleteItemFromEBay(sItemSku);
     });
   };
   
@@ -151,8 +167,29 @@ define(['jquery',
     return sHTML;
   };
   
-  objEbayCatalogueListingPanel.getButtonMarkup = function() {
-    return '';
+  objEbayCatalogueListingPanel.getButtonMarkup = function(objEbayItem) {
+    var sHTML = '';
+    sHTML += '<div class="col-sm-3 text-right" id="ebaycatalogueactionbutton-' + objEbayItem.sku + '">';
+    sHTML += '<div class="btn-group">';
+    sHTML += '<button';
+    sHTML += ' type="button"';
+    sHTML += ' id="create_offer-' + objEbayItem.sku + '"';
+    sHTML += ' class="btn btn-default"';
+    sHTML += ' data-productsku="' + objEbayItem.sku + '"';
+    sHTML += '>';
+    sHTML += 'Create Offer';
+    sHTML += '</button>';
+    sHTML += '<button class="btn btn-default dropdown-toggle"';
+    sHTML += 'data-toggle="dropdown" ';
+    sHTML += '>';
+    sHTML += '<span class="caret"></span>';
+    sHTML += '</button>';
+    sHTML += '<ul class="dropdown-menu">';
+    sHTML += '<li><a href="#" class="btn btn-danger btn-action remove_from_ebay" id="remove_from-ebay-'+objEbayItem.sku+'" data-itemsku="'+objEbayItem.sku+'">Delete</a></li>';
+    sHTML += '</ul>';
+    sHTML += '</div>';
+    sHTML += '</div>';
+    return sHTML;
   };
     
   return objEbayCatalogueListingPanel;

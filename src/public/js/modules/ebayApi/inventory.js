@@ -65,7 +65,7 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
     this.makeCall('put', objInventoryApi.sApiName, 'inventory_item', sProductCode, objProductData, sCallbackFunction);
   };
   
-  objInventoryApi.deleteInventoryItem = function(sProductCode, objProductData, sCallbackFunction) {
+  objInventoryApi.deleteInventoryItem = function(sProductCode, sCallbackFunction) {
     this.makeCall('delete', objInventoryApi.sApiName, 'inventory_item', sProductCode, {}, sCallbackFunction);
   };  
   

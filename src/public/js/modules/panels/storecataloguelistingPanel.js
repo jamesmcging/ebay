@@ -331,17 +331,17 @@ define(['jquery',
     switch (nItemStatus) {
       case "NOT_ON_EBAY":
         sButtonText  = 'Push to eBay';
-        sButtonClass = 'btn push-to-ebay';
+        sButtonClass = 'btn btn-default push-to-ebay';
         break;
         
       case "ON_EBAY": 
         sButtonText = 'Update on eBay';
-        sButtonClass = 'btn push-to-ebay';
+        sButtonClass = 'btn btn-default push-to-ebay';
         break;
 
       default: 
         sButtonText  = 'UNKNOWN';
-        sButtonClass = 'btn';
+        sButtonClass = 'btn btn-default';
         sDisabled    = 'disabled="disabled"';
     }
 
@@ -354,7 +354,7 @@ define(['jquery',
     sHTML += sDisabled + '>';
     sHTML += sButtonText;
     sHTML += '</button>';
-    sHTML += '<button class="btn dropdown-toggle"';
+    sHTML += '<button class="btn btn-default dropdown-toggle"';
     sHTML += 'data-toggle="dropdown" ';
     sHTML += '>';
     sHTML += '<span class="caret"></span>';

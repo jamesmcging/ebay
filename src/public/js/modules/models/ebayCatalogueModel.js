@@ -206,26 +206,35 @@ define([
     }
   };
   
-  objEbayCatalogueModel.deleteItemFromEBay = function(nItemID) {
+  objEbayCatalogueModel.deleteItemFromEBay = function(sProductCode) {
     if (app.objModel.objEbayAuthorization.getStatus() === 4) {
       
-      var objItem = app.objModel.objStoreCatalogueModel.getItemByID(nItemID);
+      var objItem = app.objModel.objStoreCatalogueModel.getItemByCode(sProductCode);
       
       /* Use the eBay REST interface to delete the item from the eBay inventory */
-      objApiInventory.deleteLocation(nItemID, objEbayCatalogueModel.deleteItemFromEbayRestResponse);
+      objApiInventory.deleteInventoryItem(sProductCode, objEbayCatalogueModel.deleteItemFromEbayRestResponse);
       
       /* Update the item action button on the store listing page */
-      nsc('push-to-ebay-'+nItemID).text('Updating');
+      nsc('push-to-ebay-'+sProductCode).text('Updating');
 
       /* Update the model */
-      objEbayCatalogueModel.objItems[objItem['product_code']] = {sStatus:'DELETING_FROM_EBAY'};
+      app.objModel.objEbayCatalogueModel.objItems[sProductCode].sStatus = 'DELETING_FROM_EBAY';
     }
   };
   
-  objEbayCatalogueModel.deleteItemFromEbayRestResponse = function(objData) {
+  objEbayCatalogueModel.deleteItemFromEbayRestResponse = function(objData, sProductCode) {
     console.log(objData);
-    // Need to remove the item from the model and update the ebay inventory listing panel
-    // delete app.objModel.objEbayCatalogueModel.objItems[objData];
+    
+    /* If the delete call is succesfull remove the item from ebay catalogue model */
+    if (objData.nResponseCode === 204) {
+      delete app.objModel.objEbayCatalogueModel.objItems[sProductCode];
+    } else {
+      app.objModel.objEbayCatalogueModel.objItems[sProductCode].sStatus = 'UNCERTAIN - FAILED TO DELETE';
+    }
+          
+    /* Let the app know that the ebay product count has updated */
+    nsc(document).trigger('ebayCatalogueUpdated');
+    nsc(document).trigger('ebayCatalogueItemDeleted', [sProductCode]);
   };
 
   objEbayCatalogueModel.getItemStatus = function(sProductCode) {
