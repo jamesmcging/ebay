@@ -37,8 +37,7 @@ define(['jquery'], function(nsc) {
     sHTML += '  <div class="modal-dialog" role="document">';
     sHTML += '    <div class="modal-content">';
     sHTML += '      <div class="modal-header">';
-    sHTML += '        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-    sHTML += '        <h4 class="modal-title">'+this.sName+'</h4>';
+    sHTML += this.getModalHeaderMarkup();
     sHTML += '      </div>';
     sHTML += '      <div class="modal-body">';
     sHTML += this.getModalBodyMarkup();
@@ -56,6 +55,13 @@ define(['jquery'], function(nsc) {
   
   objPanel.hideModal = function() {
     nsc('#modal-anchor').modal('hide');
+  };
+  
+  objPanel.getModalHeaderMarkup = function() {
+    var sHTML = '';
+    sHTML += '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+    sHTML += '<h4 class="modal-title">'+this.sName+'</h4>';
+    return sHTML;
   };
   
   objPanel.getModalBodyMarkup = function() {

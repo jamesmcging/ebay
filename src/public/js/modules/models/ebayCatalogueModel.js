@@ -18,9 +18,10 @@ define([
     sOrderByDirection : 'ASC'
   };
 
-  objEbayCatalogueModel.N_ITEM_DATA_TTL = (60 * 60 * 24 * 7); // Data has a TTL of 1 week
-  objEbayCatalogueModel.sCatalogueKey   = 'ebayCatalogue';
-  objEbayCatalogueModel.nEBayItemCount      = 'unknown';
+  objEbayCatalogueModel.N_ITEM_DATA_TTL  = (60 * 60 * 24 * 7); // Data has a TTL of 1 week
+  objEbayCatalogueModel.sCatalogueKey    = 'ebayCatalogue';
+  objEbayCatalogueModel.nEBayItemCount   = 'unknown';
+  objEbayCatalogueModel.nCurrentItemCode = null;
   
   objEbayCatalogueModel.initialize = function() {
     objEbayCatalogueModel.setListeners();

@@ -98,27 +98,30 @@ class EbayApiGateway implements EbayStatus {
       
       // If the call requires any other URL identifiers, we add them now
       $sCurlURL .= (strlen($this->_sResourceId)) ? '/'.$this->_sResourceId : '';
-      
-      // Set the authorization header
-      curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
-        'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
-        'Content-Type: application/json',
-      ));
-      
+
       // Set the method and any associated parameters
       if ($this->_sMethod === 'POST') {
+        if (in_array($this->_sResource, array('offer'))) {
+          curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
+            'Content-Type: application/json',
+            'Content-Language: en-US'
+          ));
+        }
+        
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
         curl_setopt($rscCurl, CURLOPT_POST, 1);
         curl_setopt($rscCurl, CURLOPT_POSTFIELDS, json_encode($this->_arrParams));
 
       } elseif ($this->_sMethod === 'PUT') {
         // createOrUpdate REST calls have an extra mandatory header
-        if ($this->_sResource === 'inventory_item') {
+        if (in_array($this->_sResource, array('inventory_item'))) {
           curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
             'Content-Type: application/json',
             'Content-Language: en-US'
           ));
+          
         }
         
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
@@ -129,7 +132,13 @@ class EbayApiGateway implements EbayStatus {
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
         curl_setopt($rscCurl, CURLOPT_CUSTOMREQUEST, "DELETE");
         
-      } else {
+      } else {      
+        // Set the authorization header
+        curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
+          'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
+          'Content-Type: application/json',
+        ));          
+
         if (is_array($this->_arrParams) && count($this->_arrParams)) {
           $sCurlURL = $sCurlURL.'?'.http_build_query($this->_arrParams);
         }

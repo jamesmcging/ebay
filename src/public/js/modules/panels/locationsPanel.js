@@ -18,13 +18,11 @@ define([
 
   objLocationsPanel.objChildPanels = {};
   
-  objLocationsPanel.objSettings.objLocations = {};
-  
   objLocationsPanel.initialize = function() {
     
     /* Ensure the app has its locations model */
-    if (typeof app.objModel.objLocations === 'undefined') {
-      app.objModel.objLocations = objLocationsModel;
+    if (typeof app.objModel.objLocationModel === 'undefined') {
+      app.objModel.objLocationModel = objLocationsModel;
     }
     
     /* Panel starts of as inactive */
@@ -78,9 +76,9 @@ define([
       var sLocationKey = nsc(this).data('locationkey');
       
       if (sLocationKey === 'newlocation') {
-        nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(app.objModel.objLocations.getDefaultLocation()));
+        nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(app.objModel.objLocationModel.getDefaultLocation()));
       } else {
-        var objLocation = app.objModel.objLocations.getLocation(sLocationKey);
+        var objLocation = app.objModel.objLocationModel.getLocation(sLocationKey);
         if (objLocation) {
           nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocation));
         } else {
@@ -91,7 +89,7 @@ define([
       
       nsc('.amendlocation').on('click', function() {
         var sLocationKey = nsc(event.target).data('merchantlocationkey');
-        var objLocation = app.objModel.objLocations.getLocation(sLocationKey);
+        var objLocation = app.objModel.objLocationModel.getLocation(sLocationKey);
         nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocation));
       });  
       
@@ -118,7 +116,7 @@ define([
     
     nsc('.amendlocation').on('click', function() {
       var sLocationKey = nsc(event.target).data('merchantlocationkey');
-      var objLocation = app.objModel.objLocations.getLocation(sLocationKey);
+      var objLocation = app.objModel.objLocationModel.getLocation(sLocationKey);
       nsc('#location-form').replaceWith(objLocationsPanel.getLocationFormMarkup(objLocation));
     });
       
@@ -195,7 +193,7 @@ define([
   };
   
   objLocationsPanel.getLocationListMarkup = function() {
-    var objLocations = app.objModel.objLocations.getLocations();
+    var objLocations = app.objModel.objLocationModel.getLocations();
     var sHTML = '';
     sHTML += '<div id="location-list" class="panel panel-default">';
     sHTML += '  <div class="panel-heading">List of Locations</div>';
@@ -353,9 +351,9 @@ define([
    * @returns {undefined}
    */
   objLocationsPanel.setLocations = function(objData) {
-    app.objModel.objLocations.setLocations(objData);
+    app.objModel.objLocationModel.setLocations(objData);
     
-    var objLocations = app.objModel.objLocations.getLocations();
+    var objLocations = app.objModel.objLocationModel.getLocations();
     var nNumberOfLocations = Object.keys(objLocations).length;
     if (nNumberOfLocations === 0) {
       objLocationsPanel.setInactive('Click here to set up a selling location.');
@@ -408,7 +406,7 @@ define([
   };
   
   objLocationsPanel.deleteLocation = function(sLocationKey) {
-    var objLocation = app.objModel.objLocations.getLocation(sLocationKey);
+    var objLocation = app.objModel.objLocationModel.getLocation(sLocationKey);
     objLocationsPanel.setUpdating('Deleting location '+objLocation.name);
     objApiInventory.deleteLocation(sLocationKey, objLocationsPanel.getLocations);
   };
@@ -427,15 +425,15 @@ define([
   };
   
   objLocationsPanel.enableLocation = function(sLocationKey) {
-    var objLocation = app.objModel.objLocations.getLocation(sLocationKey);
+    var objLocation = app.objModel.objLocationModel.getLocation(sLocationKey);
     objLocationsPanel.setUpdating('Setting '+objLocation.name+' status to enabled');
-    objApiInventory.enableLocation(sLocationKey, app.objModel.objLocations.setLocationEnabled);
+    objApiInventory.enableLocation(sLocationKey, app.objModel.objLocationModel.setLocationEnabled);
   };
   
   objLocationsPanel.disableLocation = function(sLocationKey) {
-    var objLocation = app.objModel.objLocations.getLocation(sLocationKey);
+    var objLocation = app.objModel.objLocationModel.getLocation(sLocationKey);
     objLocationsPanel.setUpdating('Setting '+objLocation.name+' status to disabled');
-    objApiInventory.disableLocation(sLocationKey, app.objModel.objLocations.setLocationDisabled);    
+    objApiInventory.disableLocation(sLocationKey, app.objModel.objLocationModel.setLocationDisabled);    
   };
 
   return objLocationsPanel;

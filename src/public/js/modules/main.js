@@ -4,13 +4,15 @@ requirejs(['jquery',
   'modules/models/ebayAuthorizationModel',
   'modules/models/storeCatalogueModel',
   'modules/models/ebayCatalogueModel',
+  'modules/models/ebayOffersModel',
   'bootstrap'],
   function(
     nsc,
     objInterface,
     objEbayAuthorizationModel,
     objStoreCatalogueModel,
-    objEbayCatalogueModel
+    objEbayCatalogueModel,
+    objEbayOffersModel
   ) {
   
   app = {};
@@ -36,7 +38,9 @@ requirejs(['jquery',
   app.objModel.objEbayCatalogueModel = objEbayCatalogueModel;
   app.objModel.objEbayCatalogueModel.initialize();
   
-  
+  app.objModel.objEbayOffersModel = objEbayOffersModel;
+  app.objModel.objEbayOffersModel.initialize();
+    
   /* Will eventually have to allow passing of app state but for now we'll just 
    * start with the dashboard selected. */
   nsc('#main-nav a[href="#dashboard-panel"]').tab('show');

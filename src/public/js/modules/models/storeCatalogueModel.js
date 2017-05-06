@@ -178,7 +178,9 @@ define([
   objStoreCatalogueModel.getItemByCode = function(sProductCode) {
     var arrStoreCatalogue = app.objModel.objStoreCatalogueModel.objData.arrItems;
     for (var i = 0, nLength = arrStoreCatalogue.length; i < nLength; i++) {
-      if (arrStoreCatalogue[i].product_code === sProductCode) {
+      /* Keep this as a double ==, sometimes the sProductCode is an integer and
+       * won't match with a triple === */
+      if (arrStoreCatalogue[i].product_code == sProductCode) {
         return arrStoreCatalogue[i];
       }
     }
