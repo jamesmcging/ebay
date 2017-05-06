@@ -60,7 +60,7 @@
 }
 
 /* Store Catalogue Listing Head of Table */
-#head-store-catalogue {
+#head-store-catalogue, #head-ebay-catalogue {
   background-color: #e7e7e7;
   border-left: 1px solid #ccc;
   border-bottom: 1px solid #ccc;

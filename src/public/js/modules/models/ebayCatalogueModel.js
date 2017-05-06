@@ -12,7 +12,7 @@ define([
   
   objEbayCatalogueModel.objFilters = {
     nOffset           : 0,
-    nLimit            : 20,
+    nLimit            : 100,
     nItemCount        : 0,
     sOrderByField     : 'product_name',
     sOrderByDirection : 'ASC'
@@ -52,13 +52,10 @@ define([
     }
   };
 
-  objEbayCatalogueModel.getItemsFromEbayRestResponse = function(objData) {    
+  objEbayCatalogueModel.getItemsFromEbayRestResponse = function(objData) {
     if (objData.nResponseCode === 200) {
       /* Keep track of the total number of items in the eBay inventory */
-      objEbayCatalogueModel.objFilters.nItemCount = objData.sResponseMessage.total;
-
-      /* Inform the summary panel that the ebay product count has updated */
-      nsc(document).trigger('updateSummaryPanel');
+      app.objModel.objEbayCatalogueModel.objFilters.nItemCount = objData.sResponseMessage.total;
 
       /* Store the eBay items */
       for (var i = 0, nLength = objData.sResponseMessage.inventoryItems.length; i < nLength; i++) {
@@ -69,10 +66,50 @@ define([
         objData.sResponseMessage.inventoryItems[i].sStatus = 'ON_EBAY';
 
         /* Store the eBay item */
-        objEbayCatalogueModel.objItems[sProductCode] = objData.sResponseMessage.inventoryItems[i];
+        app.objModel.objEbayCatalogueModel.objItems[sProductCode] = objData.sResponseMessage.inventoryItems[i];
       }
+      
+      /* If there are more items on ebay, fetch them */
+      if (typeof objData.sResponseMessage.next !== 'undefined') {
+        var sRegex = /offset=(\d)+/;
+        var arrElements = sRegex.exec(objData.sResponseMessage.next);
+        console.log('Fetching next set of items from ebay (offset='+arrElements[1]+')');
+        app.objModel.objEbayCatalogueModel.objFilters.nOffset = arrElements[1];
+        objEbayCatalogueModel.getItemsFromEbay();
+      }
+      
+      /* Let the app know that the ebay product count has updated */
+      nsc(document).trigger('ebayCatalogueUpdated');
+    }
+  }
+  
+  objEbayCatalogueModel.getItemFromEbay = function(sProductCode) {
+    if (app.objModel.objEbayAuthorization.getStatus() === 4) {
+      objApiInventory.getInventoryItem(sProductCode, objEbayCatalogueModel.getItemFromEbayRestResponse);
     }
   };
+
+  objEbayCatalogueModel.getItemFromEbayRestResponse = function(objData) {
+    if (objData.nResponseCode === 200) {
+      /* Store the eBay item */
+      /* We use the product code as the common key */
+      var sProductCode = objData.sResponseMessage.sku;
+
+      /* Give the item a status */
+      objData.sResponseMessage.sStatus = 'ON_EBAY';
+
+      /* Store the eBay item */
+      if (typeof app.objModel.objEbayCatalogueModel.objItems[sProductCode] === 'undefined') {
+        app.objModel.objEbayCatalogueModel.objItems[sProductCode] = {};
+      }
+      for (var sKey in objData.sResponseMessage) {
+        app.objModel.objEbayCatalogueModel.objItems[sProductCode][sKey] = objData.sResponseMessage[sKey];
+      }
+      
+      /* Let the app know that the ebay product count has updated */
+      nsc(document).trigger('ebayCatalogueUpdated');
+    }
+  }
 
   objEbayCatalogueModel.pushItemToEBay = function(nItemID) {
     if (app.objModel.objEbayAuthorization.getStatus() === 4) {
@@ -102,31 +139,31 @@ define([
           }
         },
         condition            : objMapper.getItemDataByField('condition', objItem),
-  //      conditionDescription : objMapper.getItemDataByField('conditionDescription', objItem),
-  //      packageWeightAndSize : {
-  //        dimensions : {
-  //          height : objMapper.getItemDataByField('packageWeightAndSize.dimensions.height', objItem),
-  //          length : objMapper.getItemDataByField('packageWeightAndSize.dimensions.length', objItem),
-  //          unit   : objMapper.getItemDataByField('packageWeightAndSize.dimensions.unit', objItem),
-  //          width  : objMapper.getItemDataByField('packageWeightAndSize.dimensions.width', objItem)
-  //        },
-  //        packageType : objMapper.getItemDataByField('packageWeightAndSize.packageType', objItem),
-  //        weight : {
-  //          unit  : 'KILOGRAM', //objMapper.getItemDataByField('packageWeightAndSize.weight.unit', objItem),
-  //          value : 1//objMapper.getItemDataByField('packageWeightAndSize.weight.value', objItem)
-  //        }
-  //      },
+        conditionDescription : objMapper.getItemDataByField('conditionDescription', objItem),
+        packageWeightAndSize : {
+          dimensions : {
+            height : objMapper.getItemDataByField('packageWeightAndSize.dimensions.height', objItem),
+            length : objMapper.getItemDataByField('packageWeightAndSize.dimensions.length', objItem),
+            unit   : objMapper.getItemDataByField('packageWeightAndSize.dimensions.unit', objItem),
+            width  : objMapper.getItemDataByField('packageWeightAndSize.dimensions.width', objItem)
+          },
+          packageType : objMapper.getItemDataByField('packageWeightAndSize.packageType', objItem),
+          weight : {
+            unit  : 'KILOGRAM', //objMapper.getItemDataByField('packageWeightAndSize.weight.unit', objItem),
+            value : 1//objMapper.getItemDataByField('packageWeightAndSize.weight.value', objItem)
+          }
+        },
         product : {
-  //        aspects     : {}, //objMapper.getItemDataByField('product.aspects', objItem)],
-  //        brand       : objMapper.getItemDataByField('product.brand', objItem),
+          aspects     : {}, //objMapper.getItemDataByField('product.aspects', objItem)],
+          brand       : objMapper.getItemDataByField('product.brand', objItem),
           description : 'test description',//objMapper.getItemDataByField('product.description', objItem),
-  //        ean         : [objMapper.getItemDataByField('product.ean', objItem)],
+          ean         : [objMapper.getItemDataByField('product.ean', objItem)],
           imageUrls   : [objMapper.getItemDataByField('product.imageUrls', objItem)],
-  //        isbn        : [objMapper.getItemDataByField('product.isbn', objItem)],
-  //        mpn         : objMapper.getItemDataByField('product.mpn', objItem),
-  //        subtitle    : objMapper.getItemDataByField('product.subtitle', objItem),
+          isbn        : [objMapper.getItemDataByField('product.isbn', objItem)],
+          mpn         : objMapper.getItemDataByField('product.mpn', objItem),
+          subtitle    : objMapper.getItemDataByField('product.subtitle', objItem),
           title       : objMapper.getItemDataByField('product.title', objItem),
-  //        upc         : [objMapper.getItemDataByField('product.upc', objItem)]
+          upc         : [objMapper.getItemDataByField('product.upc', objItem)]
         },
         sku : objItem['product_code']
       };
@@ -149,9 +186,13 @@ define([
     var nItemID = objItem.product_id;
     
     /* Check for success of call */
-    if (objData.nResponseCode === 200) {      
+    if (objData.nResponseCode === 204) {      
       /* If call is successful add item to this model */
-      app.objModel.objEbayCatalogueModel.objItems[sItemCode] = {sStatus : 'ON_EBAY'} ;//objData.sResponseMessage;// Once we get a 200 fill this out correctly!
+      app.objModel.objEbayCatalogueModel.objItems[sItemCode] = {sStatus : 'ON_EBAY'} ;
+      
+      /* The eBay REST doesn't return the item succesfully pushed, we need to 
+       * fetch it from ebay */
+      app.objModel.objEbayCatalogueModel.getItemFromEbay(sItemCode);
       
       /* Update the item action button on the store listing page */
       nsc('#push-to-ebay-'+nItemID).text('On Ebay');
@@ -195,12 +236,12 @@ define([
    */
   objEbayCatalogueModel.getItemById = function(nItemID) {};
 
-  objEbayCatalogueModel.getItemStatus = function(nItemID) {
+  objEbayCatalogueModel.getItemStatus = function(sProductCode) {
     var sItemStatus = 'UNKNOWN';
     
     /* Do we have the item in our ebay catalogue? */
-    if (typeof objEbayCatalogueModel.objItems[nItemID] !== 'undefined') {
-      sItemStatus = objEbayCatalogueModel.objItems[nItemID].sStatus;
+    if (typeof objEbayCatalogueModel.objItems[sProductCode] !== 'undefined') {
+      sItemStatus = objEbayCatalogueModel.objItems[sProductCode].sStatus;
     } else {
       sItemStatus = 'NOT_ON_EBAY';
     }

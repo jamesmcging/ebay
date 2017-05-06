@@ -47,7 +47,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   };
   
   objStatusPanel.setActive = function(sMessage) {
-    console.log('objStatusPanel.setActive('+this.sCode+')');
+//    console.log('objStatusPanel.setActive('+this.sCode+')');
     
     this.objSettings.bActive = true;
     
@@ -67,7 +67,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
   };
   
   objStatusPanel.setInactive = function(sMessage) {
-    console.log('objStatusPanel.setInactive('+this.sCode+')');
+//    console.log('objStatusPanel.setInactive('+this.sCode+')');
     this.objSettings.bActive = false;
     
     nsc('#'+this.sCode+'-panel').removeClass();

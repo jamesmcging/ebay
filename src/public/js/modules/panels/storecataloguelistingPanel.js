@@ -94,30 +94,15 @@ define(['jquery',
       app.objModel.objStoreCatalogueModel.objFilters.nOffset = nsc(this).data('noffset');
       app.objModel.objStoreCatalogueModel.getItemsFromAPI();
     });
-
-//    /* Make the search box the default input on the interface */
-//    nsc('#finditem').focus();
-//
-//    nsc('#checkbox-all-store-items').off().on('click', function() {
-//      if (nsc(this).attr('checked')) {
-//        nsc('.item-checkbox').attr('checked', 'checked');
-//        nsc('#group-action').removeAttr('disabled');
-//      } else {
-//        nsc('.item-checkbox').removeAttr('checked');
-//        nsc('#group-action').attr('disabled', 'disabled');
-//      }
-//    });
-//    
-//    nsc('.item-checkbox').off().on('click', function() {
-//      if (nsc(this).attr('checked')) {
-//        nsc('#group-action').removeAttr('disabled');
-//      } else {
-//        var arrCheckboxes = nsc('.item-checkbox:checked');
-//        if (arrCheckboxes.length === 0) {
-//          nsc('#group-action').attr('disabled', 'disabled');
-//        }
-//      }
-//    });
+    
+    nsc(document).on('ebayCatalogueUpdated', function() {
+      console.log('store catalogue listing panel has noticed that the enay catalogue has updated');
+      var arrItems = app.objModel.objStoreCatalogueModel.objData.arrItems;
+      for(var i in arrItems) {
+        nsc('#storecatalogueactionbutton-' + arrItems[i].product_id).replaceWith(objStoreCatalogueListingPanel.getButtonMarkup(arrItems[i]));
+      }
+    });
+    
   };
   
   objStoreCatalogueListingPanel.initialize = function() {
@@ -337,7 +322,10 @@ define(['jquery',
   };
     
   objStoreCatalogueListingPanel.getButtonMarkup = function(objItem) {
-    var nItemStatus  = app.objModel.objEbayCatalogueModel.getItemStatus(objItem.product_id);
+    var nItemStatus  = app.objModel.objEbayCatalogueModel.getItemStatus(objItem.product_code);
+    console.log(objItem);
+    console.log('nItemStatus: '+nItemStatus);
+    console.log('-----------------------------------------');
     var sButtonText  = 'Push to eBay';
     var sButtonClass = 'btn';
     var sDisabled    = '';
@@ -360,7 +348,7 @@ define(['jquery',
     }
 
     var sHTML = '';
-    sHTML += '<div class="col-sm-3 text-right">';
+    sHTML += '<div class="col-sm-3 text-right" id="storecatalogueactionbutton-' + objItem.product_id + '">';
     sHTML += '<div class="btn-group">';
     sHTML += '<button id="push-to-ebay-' + objItem.product_id + '"';
     sHTML += ' data-productid="' + objItem.product_id + '"';

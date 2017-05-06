@@ -79,7 +79,7 @@ define(['jquery',
       objSummaryPanel.render();
     });
     
-    nsc(document).on('updateSummaryPanel', function() {
+    nsc(document).on('ebayCatalogueUpdated', function() {
       objSummaryPanel.render();
     });
   };

@@ -56,6 +56,11 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
     this.makeCall('get', objInventoryApi.sApiName, 'inventory_item', '', {limit: nLimit, offset:nOffset}, sCallbackFunction);
   };
   
+  objInventoryApi.getInventoryItem = function(sSku, sCallbackFunction) {
+    // GET https://api.ebay.com/sell/inventory/v1/inventory_item/{sku}
+    this.makeCall('get', objInventoryApi.sApiName, 'inventory_item', sSku, '', sCallbackFunction);
+  };
+  
   objInventoryApi.createOrUpdateInventoryItem = function(sProductCode, objProductData, sCallbackFunction) {
     this.makeCall('put', objInventoryApi.sApiName, 'inventory_item', sProductCode, objProductData, sCallbackFunction);
   };

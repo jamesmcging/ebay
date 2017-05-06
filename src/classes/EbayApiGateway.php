@@ -130,7 +130,7 @@ class EbayApiGateway implements EbayStatus {
         curl_setopt($rscCurl, CURLOPT_CUSTOMREQUEST, "DELETE");
         
       } else {
-        if (count($this->_arrParams)) {
+        if (is_array($this->_arrParams) && count($this->_arrParams)) {
           $sCurlURL = $sCurlURL.'?'.http_build_query($this->_arrParams);
         }
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
@@ -163,7 +163,7 @@ class EbayApiGateway implements EbayStatus {
     
     $this->_arrResponse['sMethod']    = $this->_sMethod;
     $this->_arrResponse['arrParams']  = $this->_arrParams;
-    $this->_arrResponse['sParams']    = http_build_query($this->_arrParams);
+    $this->_arrResponse['sParams']    = is_array($this->_arrParams) ? http_build_query($this->_arrParams) : '';
     $this->_arrResponse['sTargetURL'] = isset($sCurlURL) ? $sCurlURL : 'no curl URL set';
     
     return $this->_arrResponse;
