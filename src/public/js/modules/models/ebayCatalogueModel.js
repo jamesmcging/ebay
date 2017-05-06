@@ -227,14 +227,6 @@ define([
     // Need to remove the item from the model and update the ebay inventory listing panel
     // delete app.objModel.objEbayCatalogueModel.objItems[objData];
   };
-  
-  /**
-   * Function charged with returning an item from the store catalogue model.
-   * 
-   * @param {int} nItemID
-   * @returns {Boolean|objItem}
-   */
-  objEbayCatalogueModel.getItemById = function(nItemID) {};
 
   objEbayCatalogueModel.getItemStatus = function(sProductCode) {
     var sItemStatus = 'UNKNOWN';

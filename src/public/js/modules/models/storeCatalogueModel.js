@@ -31,6 +31,7 @@ define([
 
   objStoreCatalogueModel.N_ITEM_DATA_TTL = (60 * 60 * 24 * 7); // Data has a TTL of 1 week
   objStoreCatalogueModel.sCatalogueKey = 'storeCatalogue';
+  objStoreCatalogueModel.nCurrentItem = false;
   
   objStoreCatalogueModel.initialize = function() {
     /* Ask the store for details such as a list of departments, categories, 
@@ -103,9 +104,9 @@ define([
   
   objStoreCatalogueModel.getItemByID = function(nProductID) {
     var response = false;
-    for (var i = 0, nLength = objStoreCatalogueModel.objData.arrItems.length; i < nLength; i++) {
-      if (objStoreCatalogueModel.objData.arrItems[i].product_id == nProductID) {
-        return objStoreCatalogueModel.objData.arrItems[i]; 
+    for (var i = 0, nLength = app.objModel.objStoreCatalogueModel.objData.arrItems.length; i < nLength; i++) {
+      if (app.objModel.objStoreCatalogueModel.objData.arrItems[i].product_id == nProductID) {
+        return app.objModel.objStoreCatalogueModel.objData.arrItems[i]; 
       }
     }
     return response;
@@ -158,20 +159,12 @@ define([
     localStorage.setItem(sStoreKey, JSON.stringify(objItem));
   };
   
-  /**
-   * Function charged with returning an item from the store catalogue model.
-   * 
-   * @param {int} nItemID
-   * @returns {Boolean|objItem}
-   */
   objStoreCatalogueModel.getItemById = function(nItemID) {
-    var objItem = null;
-    var sItemKey = this.sCatalogueKey + '-' + nItemID;
-    var sItem = localStorage.getItem(sItemKey);
-    if (sItem) {
-      objItem = JSON.parse(sItem);
+    for (var i in app.objModel.objStoreCatalogueModel.objData.arrItems) {
+      if (app.objModel.objStoreCatalogueModel.objData.arrItems[i].product_id == nItemID) {        
+        return app.objModel.objStoreCatalogueModel.objData.arrItems[i];
+      }
     }
-    return objItem;
   };
   
   objStoreCatalogueModel.getItemByCode = function(sProductCode) {

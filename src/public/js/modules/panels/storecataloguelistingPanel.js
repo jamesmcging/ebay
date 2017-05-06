@@ -15,6 +15,8 @@ define(['jquery',
   objStoreCatalogueListingPanel.objChildPanels = {};
   
   objStoreCatalogueListingPanel.objSettings.bActive = false;
+  
+  objStoreCatalogueListingPanel.objSettings.nCurrentItem = false;
    
   objStoreCatalogueListingPanel.getPanelContent = function() {
     var sHTML = '';
@@ -75,11 +77,10 @@ define(['jquery',
       app.objModel.objEbayCatalogueModel.pushItemToEBay(nProductID);
     });
     
-    /* This code causes the selected product to be deleted from the ebay inventory */
-    nsc('.remove-from-ebay').off().on('click', function() {
-      var nProductID = nsc(this).data('productid');
-      app.objModel.objEbayCatalogueModel.deleteItemFromEBay(nProductID);
-    });    
+    nsc('.view-details').off().on('click', function(){
+      var itemId = nsc(this).data('itemid');
+      objStoreCatalogueListingPanel.showItemDetails(itemId)
+    });
     
     nsc('#item-limit-menu').on('change', function() {
       app.objModel.objStoreCatalogueModel.objFilters.nLimit = nsc(this).val();
@@ -323,9 +324,6 @@ define(['jquery',
     
   objStoreCatalogueListingPanel.getButtonMarkup = function(objItem) {
     var nItemStatus  = app.objModel.objEbayCatalogueModel.getItemStatus(objItem.product_code);
-    console.log(objItem);
-    console.log('nItemStatus: '+nItemStatus);
-    console.log('-----------------------------------------');
     var sButtonText  = 'Push to eBay';
     var sButtonClass = 'btn';
     var sDisabled    = '';
@@ -362,7 +360,7 @@ define(['jquery',
     sHTML += '<span class="caret"></span>';
     sHTML += '</button>';
     sHTML += '<ul class="dropdown-menu">';
-    sHTML += '<li><a href="btn-action2" class="btn-action remove-from-ebay">Remove from eBay</a></li>';
+    sHTML += '<li><a href="#" class="btn btn-action view-details" id="view-details-'+objItem.product_id+'" data-itemid="'+objItem.product_id+'">View details</a></li>';
     sHTML += '</ul>';
     sHTML += '</div>';
     sHTML += '</div>';
@@ -656,8 +654,30 @@ define(['jquery',
     return sHTML;
   };  
   
+  objStoreCatalogueListingPanel.showItemDetails = function(itemID) {
+    app.objModel.objStoreCatalogueModel.nCurrentItem = itemID;
+    objStoreCatalogueListingPanel.showModal();
+  };
   
+  objStoreCatalogueListingPanel.getModalBodyMarkup = function() {
+    var objItem = app.objModel.objStoreCatalogueModel.getItemById(app.objModel.objStoreCatalogueModel.nCurrentItem);
+    
+    var sHTML = '';
+    
+    sHTML += '<dl>';
+    for (var sKey in objItem) {
+      sHTML += '<dt>'+sKey+'</dt>';
+      sHTML += '<dd>'+objItem[sKey]+'</dd>';
+    }
+    sHTML += '</dl>';
+    
+    return sHTML;
+  };
   
+  objStoreCatalogueListingPanel.getModalFooterMarkup = function() {
+    var sHTML = '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+    return sHTML;
+  };
   
   return objStoreCatalogueListingPanel;
 });
