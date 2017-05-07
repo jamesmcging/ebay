@@ -43,6 +43,11 @@ $app->get('/', function (Request $objRequest, Response $objResponse) {
             <script src="js/config.js"></script>
             <script data-main="modules/main" src="js/lib/require.js"></script>
           </div>
+            
+          <div id="loading-screen" class="text-center">
+            <span class="fa fa-3x fa-refresh fa-spin fa-fw text-center"></span>
+            <p class="text-center">Loading Alaname...</p>
+          </div>
         </body>
       </html>
 HTML;

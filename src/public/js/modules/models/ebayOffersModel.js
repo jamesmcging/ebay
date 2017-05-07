@@ -18,12 +18,42 @@ define([
   
   objEbayOffersModel.setListeners = function() {};
     
+  objEbayOffersModel.getOffersForProduct = function(sProductCode) {
+    if (typeof app.objModel.objEbayOffersModel.objOffers[sProductCode] !== 'undefined') {
+      return app.objModel.objEbayOffersModel.objOffers[sProductCode];
+    } else {
+      return false;
+    }
+  }; 
+  
   
   /* ------------------------------------------------------------------------ */
   
-  objEbayOffersModel.getOffersFromEbayByProductcode = function(sSku) {};
+  objEbayOffersModel.getOffersFromEbayByProductcode = function(sProductCode) {
+    objApiInventory.getOffersByProductCode(sProductCode, objEbayOffersModel.getOffersFromEbayByProductcodeRestResponse);
+  };
   
-  objEbayOffersModel.getOffersFromEbayByProductcodeRestResponse = function(objData) {};
+  objEbayOffersModel.getOffersFromEbayByProductcodeRestResponse = function(objData) {
+    var nOffersFetched = 0;
+    
+    if(objData.sResponseMessage.total > 0) {
+      nOffersFetched = objData.sResponseMessage.total;
+      for (var i = 0, nLength = objData.sResponseMessage.offers.length; i < nLength; i++) {
+        var nOfferId = objData.sResponseMessage.offers[i].offerId;
+        var sProductCode = objData.sResponseMessage.offers[i].sku;
+        
+        /* Ensure we have a place to drop this offer */
+        if (typeof objEbayOffersModel.objOffers[sProductCode] === 'undefined') {
+          objEbayOffersModel.objOffers[sProductCode] = {};
+        }
+        
+        /* Save the offer */
+        objEbayOffersModel.objOffers[sProductCode][nOfferId] = objData.sResponseMessage.offers[i];
+      }
+    }
+    
+    nsc(document).trigger('offersfetched', [nOffersFetched]);
+  };
   
   
   objEbayOffersModel.getOfferFromEbayByOfferId = function(sOfferID) {};

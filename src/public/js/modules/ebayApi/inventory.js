@@ -69,6 +69,11 @@ define(['jquery', 'modules/ebayApi/restCaller'], function(nsc, objRestCaller) {
     this.makeCall('delete', objInventoryApi.sApiName, 'inventory_item', sProductCode, {}, sCallbackFunction);
   };  
   
+  objInventoryApi.getOffersByProductCode = function(sProductCode, sCallbackFunction) {
+    // GET https://api.ebay.com/sell/inventory/v1/offer?sku=sProductCode
+    this.makeCall('get', objInventoryApi.sApiName, 'offer', '?sku='+sProductCode, {}, sCallbackFunction);
+  };
+  
   objInventoryApi.createOffer = function(objData, sCallbackFunction) {
     // POST https://api.ebay.com/sell/inventory/v1/offer
     this.makeCall('post', objInventoryApi.sApiName, 'offer', '', objData, sCallbackFunction);

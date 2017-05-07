@@ -34,6 +34,8 @@ function(nsc,
   
   objInterface.render = function() {
     
+    nsc('#loading-screen').remove();
+    
     var sHTML = '';
     
     sHTML += '<div id="app-body" class="container">';
