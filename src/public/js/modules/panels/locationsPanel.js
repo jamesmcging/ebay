@@ -131,8 +131,6 @@ define([
     nsc(document).on('locationsRetrieved', function() {
       if ((nsc('#modal-anchor').data('bs.modal') || {}).isShown) {
         objLocationsPanel.refreshModal();
-      } else {
-        console.log('locations retrieved but modal closed');
       }
     });
     

@@ -78,7 +78,8 @@ define([
     },
     sku : 'product_code',
     location : '',
-    price : 'product_price'
+    price : 'product_price',
+    marketplace : 'EBAY_US'
   };
   
   objDataMappingModel.objFieldMetaData = {
@@ -101,7 +102,8 @@ define([
       
     /* The following are meta (non-ebay) fields */
     location             : {node: 'location', require: false, default: '', datatype: 'string'},
-    price                : {node: 'price', require: false, default: 'product_price', datatype: 'float'}
+    price                : {node: 'price', require: false, default: 'product_price', datatype: 'float'},
+    marketplace          : {node: 'marketplace', require: false, default: 'EBAY_US', datatype: 'enum', possible_values: ['EBAY_US, EBAY_UK, EBAY_CA, EBAY_IE']}
   };
           
   objDataMappingModel.arrProductFields = [
@@ -397,6 +399,10 @@ define([
         break;
     }
     return sData;
+  };
+  
+  objDataMappingModel.getDefaultMarketplace = function() {
+    return objDataMappingModel.objDatamappings.marketplace;
   };
   
   return objDataMappingModel;

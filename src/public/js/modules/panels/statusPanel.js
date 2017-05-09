@@ -43,6 +43,7 @@ define(['jquery', 'modules/panels/panel'], function(nsc, objPanel) {
     sHTML += '<div id="'+this.sCode+'-panel" class="status-panel">';
     sHTML += this.getPanelContent();
     sHTML += '</div>';
+    
     return sHTML;
   };
   

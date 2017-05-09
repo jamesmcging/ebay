@@ -2,11 +2,18 @@ define(['jquery',
   'modules/tabs/tab',
   'modules/panels/summaryPanel',
   'modules/panels/credentialsPanel', 
-  'modules/panels/policiesPanel',
   'modules/panels/locationsPanel',
-  'modules/panels/datamappingPanel'
+  'modules/panels/datamappingPanel',
+  'modules/panels/returnpolicyPanel'
 ],
-function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, objLocationsPanel, objDatamappingPanel) {
+function(nsc, 
+  objTab, 
+  objSummaryPanel, 
+  objCredentialsPanel, 
+  objLocationsPanel, 
+  objDatamappingPanel,
+  objReturnsPanel
+) {
    
   var objDashboard = {};
 
@@ -20,15 +27,15 @@ function(nsc, objTab, objSummaryPanel, objCredentialsPanel, objPoliciesPanel, ob
   objDashboard.objChildPanels = {
     summarypanel     : objSummaryPanel,
     credentialspanel : objCredentialsPanel,
-    //policiespanel    : objPoliciesPanel,
     locationspanel   : objLocationsPanel,
-    datamappingpanel : objDatamappingPanel
+    datamappingpanel : objDatamappingPanel,
+    returnpoliciespanel : objReturnsPanel
   };
   objDashboard.objStatusPanels = {
-    credentialspanel : objCredentialsPanel,
-    //policiespanel    : objPoliciesPanel,
-    locationspanel   : objLocationsPanel,
-    datamappingpanel : objDatamappingPanel
+    credentialspanel    : objCredentialsPanel,
+    locationspanel      : objLocationsPanel,
+    datamappingpanel    : objDatamappingPanel,
+    returnpoliciespanel : objReturnsPanel
   };  
   
   objDashboard.initialize = function() {
