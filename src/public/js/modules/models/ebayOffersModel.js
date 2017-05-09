@@ -34,10 +34,10 @@ define([
   };
   
   objEbayOffersModel.getOffersFromEbayByProductcodeRestResponse = function(objData) {
-    var nOffersFetched = 0;
+    objEbayOffersModel.nEbayOfferCount = 0;
     
     if(objData.sResponseMessage.total > 0) {
-      nOffersFetched = objData.sResponseMessage.total;
+      objEbayOffersModel.nEbayOfferCount = objData.sResponseMessage.total;
       for (var i = 0, nLength = objData.sResponseMessage.offers.length; i < nLength; i++) {
         var nOfferId = objData.sResponseMessage.offers[i].offerId;
         var sProductCode = objData.sResponseMessage.offers[i].sku;
@@ -52,7 +52,7 @@ define([
       }
     }
     
-    nsc(document).trigger('offersfetched', [nOffersFetched]);
+    nsc(document).trigger('offersfetched', [objEbayOffersModel.nEbayOfferCount]);
   };
   
   

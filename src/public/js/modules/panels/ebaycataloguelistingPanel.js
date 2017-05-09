@@ -62,8 +62,13 @@ define(['jquery',
       nsc('#ebay-catalogue-item-'+sProductCode).fadeOut(300, function(){nsc(this).remove();});
     });
     
+    nsc(document).on('ebayCatalogueItemFailedToDelete', function(event, sProductCode) {
+      nsc('#ebay-catalogue-item-'+sProductCode).text('Unable to delete');
+    });    
+    
     nsc('.remove_from_ebay').off().on('click', function() {
       var sItemSku = nsc(this).data('itemsku');
+      nsc(this).text('deleting...');
       app.objModel.objEbayCatalogueModel.deleteItemFromEBay(sItemSku);
     });
   };

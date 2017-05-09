@@ -129,6 +129,11 @@ class EbayApiGateway implements EbayStatus {
         curl_setopt($rscCurl, CURLOPT_POSTFIELDS, json_encode($this->_arrParams));
      
       } elseif ($this->_sMethod === 'DELETE') {
+        // Set the authorization header
+        curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
+          'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
+          'Content-Type: application/json',
+        ));         
         curl_setopt($rscCurl, CURLOPT_URL, $sCurlURL);
         curl_setopt($rscCurl, CURLOPT_CUSTOMREQUEST, "DELETE");
         

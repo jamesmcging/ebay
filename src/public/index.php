@@ -29,6 +29,5 @@ require '../routes/ebay_api.php';
 require '../routes/homepage.php';
 require '../routes/authorization.php';
 
-require '../routes/items.php';
 require '../routes/store.php';
 $app->run();

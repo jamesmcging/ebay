@@ -1,7 +1,7 @@
 // Start the main app logic.
 define(['jquery',
   'modules/panels/panel', 
-  'modules/tabs/dashboardTab', 
+  'modules/tabs/dashboardTab',
   'modules/tabs/storeCatalogueTab', 
   'modules/tabs/ebayCatalogueTab', 
   'modules/tabs/ebayListingsTab', 

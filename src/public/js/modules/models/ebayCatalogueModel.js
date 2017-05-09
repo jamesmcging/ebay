@@ -216,7 +216,7 @@ define([
       objApiInventory.deleteInventoryItem(sProductCode, objEbayCatalogueModel.deleteItemFromEbayRestResponse);
       
       /* Update the item action button on the store listing page */
-      nsc('push-to-ebay-'+sProductCode).text('Updating');
+      nsc('remove-from-ebay-'+sProductCode).text('Deleting');
 
       /* Update the model */
       app.objModel.objEbayCatalogueModel.objItems[sProductCode].sStatus = 'DELETING_FROM_EBAY';
@@ -224,18 +224,16 @@ define([
   };
   
   objEbayCatalogueModel.deleteItemFromEbayRestResponse = function(objData, sProductCode) {
-    console.log(objData);
-    
     /* If the delete call is succesfull remove the item from ebay catalogue model */
     if (objData.nResponseCode === 204) {
       delete app.objModel.objEbayCatalogueModel.objItems[sProductCode];
+      /* Let the app know that the ebay product count has updated */
+      nsc(document).trigger('ebayCatalogueUpdated');
+      nsc(document).trigger('ebayCatalogueItemDeleted', [sProductCode]);
     } else {
       app.objModel.objEbayCatalogueModel.objItems[sProductCode].sStatus = 'UNCERTAIN - FAILED TO DELETE';
+      nsc(document).trigger('ebayCatalogueItemFailedToDelete', [sProductCode]);
     }
-          
-    /* Let the app know that the ebay product count has updated */
-    nsc(document).trigger('ebayCatalogueUpdated');
-    nsc(document).trigger('ebayCatalogueItemDeleted', [sProductCode]);
   };
 
   objEbayCatalogueModel.getItemStatus = function(sProductCode) {

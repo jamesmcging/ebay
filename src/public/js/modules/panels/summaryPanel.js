@@ -37,7 +37,7 @@ define(['jquery',
     
     sHTML += '<div class="panel-heading">'; 
     sHTML += this.sName;
-    sHTML += '&nbsp;<button type="button" id="refresh-summary-panel" class="btn btn-small btn-default">Refresh</button>';
+    sHTML += '<span class="fa fa-refresh" id="refresh-summary-panel" style="float:right"></span>';
     sHTML += '</div><!-- .panel-heading -->';
     
     sHTML += '<div class="panel-body">';
