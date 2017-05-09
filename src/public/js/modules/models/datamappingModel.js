@@ -76,7 +76,9 @@ define([
         /* More string nodes here */
       ]
     },
-    sku : 'product_code'
+    sku : 'product_code',
+    location : '',
+    price : 'product_price'
   };
   
   objDataMappingModel.objFieldMetaData = {
@@ -95,7 +97,11 @@ define([
     subtitle             : {node: 'product.subtitle', required: false, default: '', datatype: 'string', maxlength: 55},      
     title                : {node: 'product.title', required: false, default: '', datatype: 'string', maxlength: 80},
     upc                  : {node: 'product.upc', required: false, default: '', datatype: 'array_of_strings'},
-    sku                  : {node: 'sku', required: true, default: 'product_code', datatype: 'strings', maxlength: 50}
+    sku                  : {node: 'sku', required: true, default: 'product_code', datatype: 'strings', maxlength: 50},
+      
+    /* The following are meta (non-ebay) fields */
+    location             : {node: 'location', require: false, default: '', datatype: 'string'},
+    price                : {node: 'price', require: false, default: 'product_price', datatype: 'float'}
   };
           
   objDataMappingModel.arrProductFields = [
@@ -310,6 +316,84 @@ define([
         break;
       case 'product.upc' :
         sData = objItem[objDataMappingModel.objDatamappings.product.upc];
+        break;
+        
+       /* Meta (non-ebay) fields */
+      case 'price' :
+        sData = objItem[objDataMappingModel.objDatamappings.price];
+        break;
+    }
+    return sData;
+  };
+  
+  objDataMappingModel.getStoreFieldDefaultByEbayField = function(sEbayFieldPath) {
+    var sData = '';
+    switch (sEbayFieldPath) {
+      case 'availability.shipToLocationAvailability.quantity' :
+        sData = objDataMappingModel.objDatamappings.availability.shipToLocationAvailability.quantity;
+        break;
+      case 'condition' :
+        sData = objDataMappingModel.objDatamappings.condition;
+        break;
+      case 'conditionDescription' :
+        sData = objDataMappingModel.objDatamappings.conditionDescription;
+        break;
+      case 'packageWeightAndSize.dimensions.height' :
+        sData = objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.height;
+        break;
+      case 'packageWeightAndSize.dimensions.length' :
+        sData = objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.length;
+        break;
+      case 'packageWeightAndSize.dimensions.unit' :
+        sData = objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.unit;
+        break;
+      case 'packageWeightAndSize.dimensions.width' :
+        sData = objDataMappingModel.objDatamappings.packageWeightAndSize.dimensions.width;
+        break;
+      case 'packageWeightAndSize.packageType' :
+        sData = objDataMappingModel.objDatamappings.packageWeightAndSize.packageType;
+        break;
+      case 'packageWeightAndSize.weight.unit' :
+        sData = objDataMappingModel.objDatamappings.packageWeightAndSize.weight.unit;
+        break;        
+      case 'packageWeightAndSize.weight.value' :
+        sData = objDataMappingModel.objDatamappings.packageWeightAndSize.weight.value;
+        break;
+      case 'product.aspects' :
+        sData = objDataMappingModel.objDatamappings.product.aspects;
+        break;
+      case 'product.brand' :
+        sData = objDataMappingModel.objDatamappings.product.brand;
+        break;
+      case 'product.description' :
+        sData = objDataMappingModel.objDatamappings.product.description;
+        break;
+      case 'product.ean' :
+        sData = objDataMappingModel.objDatamappings.product.ean;
+        break;      
+      case 'product.imageUrls' :
+        sData = objDataMappingModel.objDatamappings.product.imageUrls;
+        break;
+      case 'product.isbn' :
+        sData = objDataMappingModel.objDatamappings.product.isbn;
+        break;
+      case 'product.mpn' :
+        sData = objDataMappingModel.objDatamappings.product.mpn;
+        break;  
+      case 'product.subtitle' :
+        sData = objDataMappingModel.objDatamappings.product.subtitle;
+        break;  
+      case 'product.title' :
+        sData = objDataMappingModel.objDatamappings.product.title;
+        break;
+      case 'product.upc' :
+        sData = objDataMappingModel.objDatamappings.product.upc;
+        break;
+      case 'location' :
+        sData = objDataMappingModel.objDatamappings.location;
+        break;
+      case 'price' :
+        sData = objDataMappingModel.objDatamappings.price;
         break;
     }
     return sData;

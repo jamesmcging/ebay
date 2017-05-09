@@ -87,7 +87,7 @@ define([
     });
 
     nsc('#mappingfield-quantity').off().on('change', function(event) {
-      app.objModel.objDataMappings.availability.shipToLocationAvailability.quantity = event.target.value;
+      app.objModel.objDataMappings.objDatamappings.availability.shipToLocationAvailability.quantity = event.target.value;
     });
         
     nsc('#mappingfield-condition').off().on('change', function(event) {
@@ -149,7 +149,15 @@ define([
     nsc('#mappingfield-sku').off().on('change', function(event) {
       app.objModel.objDataMappings.objDatamappings.sku = event.target.value;
     });
+    
+    nsc('#mappingfield-location').off().on('change', function(event) {
+      app.objModel.objDataMappings.objDatamappings.location = event.target.value;
+    });
 
+    nsc('#mappingfield-price').off().on('change', function(event) {
+      app.objModel.objDataMappings.objDatamappings.price = event.target.value;
+    });
+    
     var arrMissingMappings = objDataMappingPanel.getMissingMappings();
     if (arrMissingMappings.length) {
       objDataMappingPanel.setInactive('The following fields require mappings: '+arrMissingMappings.join(', '));
@@ -230,6 +238,17 @@ define([
     sHTML += '      <td class="required">Quantity</td>';
     sHTML += '      <td>' + objDataMappingPanel.getFieldMarkup(objMappings.availability.shipToLocationAvailability.quantity, 'quantity') + '</td>';
     sHTML += '    </tr>';
+    
+    /* Meta (non-ebay fields */
+    sHTML += '    <tr>';
+    sHTML += '      <td>Default location</td>';
+    sHTML += '      <td>' + objDataMappingPanel.getLocationMarkup() + '</td>';
+    sHTML += '    </tr>';
+    sHTML += '    <tr>';
+    sHTML += '      <td>Price</td>';
+    sHTML += '      <td>' + objDataMappingPanel.getPriceMarkup() + '</td>';
+    sHTML += '    </tr>';
+    
     sHTML += '  </tbody>';
     
     sHTML += '  <tfoot>';
@@ -249,7 +268,7 @@ define([
   
   objDataMappingPanel.getFieldMarkup = function(sSelectedField, sNodeName) {
     var sHTML = '';
-    sHTML += '<select';
+    sHTML += '<select class="form-control"';
     sHTML += ' id="mappingfield-'+sNodeName+'"';
     sHTML += '>';
     for (var i = 0; i < app.objModel.objDataMappings.arrProductFields.length; i++) {
@@ -265,6 +284,55 @@ define([
     sHTML += '</select>';
     return sHTML;
   };
+  
+  objDataMappingPanel.getLocationMarkup = function() {
+    var objLocations = app.objModel.objLocationModel.getLocations();
+    var sDefaultLocation = app.objModel.objDataMappings.getStoreFieldDefaultByEbayField('location');
+    var sHTML = '';
+    
+    sHTML += '<select id="mappingfield-location" class="form-control">';
+    for (var sLocationKey in objLocations) {
+      sHTML += '<option value="'+sLocationKey+'"';
+      if (objLocations[sLocationKey].merchantLocationKey === sDefaultLocation) {
+        sHTML += ' selected="selected"';
+      }
+      sHTML += '>';
+      sHTML += objLocations[sLocationKey].name;
+      if (objLocations[sLocationKey].merchantLocationStatus === 'DISABLED') {
+        sHTML += ' - disabled';
+      }
+      sHTML += '</option>';
+    }
+    sHTML += '</select>';
+    
+    return sHTML;
+  };
+  
+  objDataMappingPanel.getPriceMarkup = function() {
+    var objPriceFields = {
+      product_price : 'Price',
+      product_priceweb : 'Web price',
+      product_pricea : 'Price A',
+      product_priceb : 'Price B',
+      product_pricec : 'Price C'
+    };
+    var sDefaultField = app.objModel.objDataMappings.getStoreFieldDefaultByEbayField('price');
+    var sHTML = '';
+    
+    sHTML += '<select id="mappingfield-price" class="form-control">';
+    for (var sField in objPriceFields) {
+      sHTML += '<option value="'+sField+'"';
+      if (sField === sDefaultField) {
+        sHTML += ' selected="selected"';
+      }
+      sHTML += '>';
+      sHTML += objPriceFields[sField];
+      sHTML += '</option>';
+    }
+    sHTML += '</select>';
+    
+    return sHTML;
+  }
   
   objDataMappingPanel.getMissingMappings = function() {
     var arrMissingMappings = [];

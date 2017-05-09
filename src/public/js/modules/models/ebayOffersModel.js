@@ -119,9 +119,9 @@ define([
   
   objEbayOffersModel.getListingFeesRestResponse = function(objData) {
     console.log(objData);
-    if (objData.nResponseCode === 201) {
+    if (objData.nResponseCode === 200) {
       /* Add the listing fee somewhere useful*/
-      
+      var objFeeSummaries = objData.sResponseMessage.feeSummaries;
       
       
       //add the listing fee!!!
@@ -130,7 +130,7 @@ define([
       
 
       /* Let the app know we have got a new offer */
-      nsc(document).trigger('listingfeeobtained', [nOfferId]);
+      //nsc(document).trigger('listingfeeobtained', [nOfferId]);
       
     } else {
       nsc(document).trigger('failedrestcall', ['Get listing fee', objData.sResponseMessage]);
