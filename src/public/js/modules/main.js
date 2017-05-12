@@ -2,6 +2,7 @@
 requirejs(['jquery',
   'modules/interface',
   'modules/models/ebayAuthorizationModel',
+  'modules/models/datamappingModel',
   'modules/models/storeCatalogueModel',
   'modules/models/ebayCatalogueModel',
   'modules/models/ebayOffersModel',
@@ -11,6 +12,7 @@ requirejs(['jquery',
     nsc,
     objInterface,
     objEbayAuthorizationModel,
+    objDataMappings,
     objStoreCatalogueModel,
     objEbayCatalogueModel,
     objEbayOffersModel,
@@ -28,6 +30,9 @@ requirejs(['jquery',
    * tab */
   app.objModel.objEbayAuthorization = objEbayAuthorizationModel;
   app.objModel.objEbayAuthorization.initialize();
+  
+  app.objModel.objDataMappings = objDataMappings;
+  app.objModel.objDataMappings.initialize();
   
   app.objModel.objStoreCatalogueModel = objStoreCatalogueModel;
   app.objModel.objStoreCatalogueModel.initialize();

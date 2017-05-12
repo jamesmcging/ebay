@@ -6,7 +6,6 @@ define(['jquery'], function(nsc) {
   objPanel.objSettings = {};
   
   objPanel.render = function() {
-    console.log('rendering '+this.sCode);
     nsc('#'+this.sCode+'-panel').replaceWith(this.getPanelMarkup());
     this.setListeners();
   };

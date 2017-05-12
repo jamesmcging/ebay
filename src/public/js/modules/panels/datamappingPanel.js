@@ -81,8 +81,6 @@ define([
       objDataMappingPanel.setActive('Data mappings updated');
       if ((nsc('#modal-anchor').data('bs.modal') || {}).isShown) {
         objDataMappingPanel.hideModal();
-      } else {
-        console.log('locations retrieved but modal closed');
       }
     });
 

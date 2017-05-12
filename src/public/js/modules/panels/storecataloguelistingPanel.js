@@ -30,10 +30,6 @@ define(['jquery',
       sHTML += objStoreCatalogueListingPanel.getItemListHeaderMarkup();
       sHTML += objStoreCatalogueListingPanel.getItemListMarkup();
       sHTML += '</div>';
-      
-      /* The item detail panel */
-      sHTML += '<div id="item-details-panel" class="col-sm-0">';
-      sHTML += '</div><!-- #item-details-panel -->';
 
       sHTML += '</div><!-- .row -->';
 

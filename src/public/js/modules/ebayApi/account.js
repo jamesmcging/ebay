@@ -19,9 +19,9 @@ define(['jquery',
     this.makeCall('post', objAccountApi.sApiName, 'return_policy', '', objPolicyData, sCallbackFunction);
   };
 
-  objAccountApi.deleteReturnPolicy = function(nPolicyId, sCallbackFunction) {
+  objAccountApi.deleteReturnPolicy = function(nPolicyId, objData, sCallbackFunction) {
     // DELETE https://api.ebay.com/sell/account/v1/return_policy/{nPolicyId}
-    this.makeCall('delete', objAccountApi.sApiName, 'return_policy', nPolicyId, {}, sCallbackFunction);
+    this.makeCall('delete', objAccountApi.sApiName, 'return_policy', nPolicyId, objData, sCallbackFunction);
   };
   
   objAccountApi.getReturnPoliciesByMarketplace = function(sMarketplaceId, sCallbackFunction) {
