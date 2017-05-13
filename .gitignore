@@ -1,5 +1,5 @@
-/src/vendor/
-/src/config/
+/Ebay/vendor/
+/Ebay/config/
 /nbproject/
 
 # Elastic Beanstalk Files
