@@ -101,7 +101,7 @@ class EbayApiGateway implements EbayStatus {
 
       // Set the method and any associated parameters
       if ($this->_sMethod === 'POST') {
-        if (in_array($this->_sResource, array('offer', 'return_policy', 'fulfillment_policy'))) {
+        if (in_array($this->_sResource, array('offer', 'return_policy', 'fulfillment_policy', 'payment_policy'))) {
           curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
             'Content-Type: application/json',
@@ -115,7 +115,7 @@ class EbayApiGateway implements EbayStatus {
 
       } elseif ($this->_sMethod === 'PUT') {
         // createOrUpdate REST calls have an extra mandatory header
-        if (in_array($this->_sResource, array('inventory_item', 'return_policy', 'fulfillment_policy'))) {
+        if (in_array($this->_sResource, array('inventory_item', 'return_policy', 'fulfillment_policy', 'payment_policy'))) {
           curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
             'Content-Type: application/json',
