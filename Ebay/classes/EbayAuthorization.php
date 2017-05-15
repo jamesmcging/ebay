@@ -121,7 +121,7 @@ class EbayAuthorization implements EbayStatus {
   }
   
   public function getUserToken() {
-    return $this->_arrUserToken['sAccessToken'];
+    return !empty($this->_arrUserToken['sAccessToken']) ? $this->_arrUserToken['sAccessToken'] : false;
   }
   
   /**
