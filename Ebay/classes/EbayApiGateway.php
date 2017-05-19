@@ -54,7 +54,7 @@ class EbayApiGateway implements EbayStatus {
   }
   
   public function setRestApi($sApiName) {
-    if (in_array($sApiName, array('inventory', 'account'))) {
+    if (in_array($sApiName, array('inventory', 'account', 'offer'))) {
       $this->_sAPIName = strtolower($sApiName);
     }
     return $this;
@@ -115,7 +115,7 @@ class EbayApiGateway implements EbayStatus {
 
       } elseif ($this->_sMethod === 'PUT') {
         // createOrUpdate REST calls have an extra mandatory header
-        if (in_array($this->_sResource, array('inventory_item', 'return_policy', 'fulfillment_policy', 'payment_policy'))) {
+        if (in_array($this->_sResource, array('offer', 'inventory_item', 'return_policy', 'fulfillment_policy', 'payment_policy'))) {
           curl_setopt($rscCurl, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer '.$this->_objAuthorization->getUserToken(),
             'Content-Type: application/json',
