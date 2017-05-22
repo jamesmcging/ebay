@@ -1,7 +1,7 @@
 # ebay-service-ebay
 
 ### Masters in Software Development @ CIT 2017
-
+This service forms part of a collection of micro-services that make up the Alaname application. This web application exists to push items from a web DB to eBay and pull orders arising from these back to the web DB. When deployed as part of an omnichannel ecommerce platform this application offers eBay as a channel.
 ### Overview
 This service is charged with providing the interface between the app and eBay. As the eBay APIs do not provide jsonP or CORS support as of May 2017, all calls from the app must go through a server capable of making curl requests. The resources this API provides can be found at ebay.alaname.com 
 ### Authentication with eBay
