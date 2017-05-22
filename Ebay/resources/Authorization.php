@@ -35,7 +35,10 @@ class Authorization {
 //  }
   
   public function getStatus(Request $objRequest, Response $objResponse) {
-    $arrStatus = array('ebay_authorization_status' => $this->_objContainer->objAuthorization->getStatus());
+    $arrStatus = array(
+      'ebay_authorization_status' => $this->_objContainer->objAuthorization->getStatus(),
+      'renewresponse'             => $this->_objContainer->objAuthorization->sRenewTokenResponse
+    );
     
     return $objResponse->withJson($arrStatus, 200);
   }

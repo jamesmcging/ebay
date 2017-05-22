@@ -17,6 +17,9 @@ class EbayAuthorization implements EbayStatus {
   private $_sEbayTokenRequestEndpoint = '';
   private $_sGetAuthorizationEndpoint = '';
   
+  
+  public $sRenewTokenResponse = '';
+  
   // The current status of our authorization
   private $_bEbayStatus = EbayStatus::UNINITIALIZED;
   
@@ -277,7 +280,7 @@ class EbayAuthorization implements EbayStatus {
       $sResponse = curl_exec($rscConnection);
 
       $this->sResponse = $sResponse;
-
+$this->sRenewTokenResponse = $sResponse;
       curl_close($rscConnection);
 
       $arrResponse = json_decode($sResponse, true);
