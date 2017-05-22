@@ -54,7 +54,7 @@ class EbayApiGateway implements EbayStatus {
   }
   
   public function setRestApi($sApiName) {
-    if (in_array($sApiName, array('inventory', 'account', 'offer'))) {
+    if (in_array($sApiName, array('inventory', 'account', 'offer', 'fulfillment'))) {
       $this->_sAPIName = strtolower($sApiName);
     }
     return $this;
